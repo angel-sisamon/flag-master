@@ -327,9 +327,17 @@ function _launchReview(wrongCodes) {
   _startGameFromState();
 }
 
+/**
+ * FIX: En modo 'review', devolver el modo visual del modo original (_selectedModeId)
+ * para que las preguntas y opciones se rendericen con banderas o nombres según corresponda.
+ */
 function _displayMode() {
   var state = getGameState(); if (!state) return 'guess-country';
-  return (state.mode === 'timetrial' || state.mode === 'daily') ? 'guess-country' : state.mode;
+  if (state.mode === 'review') {
+    return _selectedModeId === 'guess-flag' ? 'guess-flag' : 'guess-country';
+  }
+  return (state.mode === 'timetrial' || state.mode === 'daily') ?
+    'guess-country' : state.mode;
 }
 
 function _startGameFromState() {
