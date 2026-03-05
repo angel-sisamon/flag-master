@@ -91,6 +91,9 @@ document.addEventListener('DOMContentLoaded', function () {
       PlayGamesService.syncAllLocal();
       var pgsBtn = document.getElementById('btn-pgs-achievements');
       if (pgsBtn) pgsBtn.style.display = 'block';
+
+      var lbBtn = document.getElementById('btn-pgs-leaderboard');
+      if (lbBtn) lbBtn.style.display = 'block';
     }
   });
 
@@ -170,6 +173,14 @@ document.addEventListener('DOMContentLoaded', function () {
   if (pgsBtn) {
     pgsBtn.addEventListener('click', function () {
       PlayGamesService.showAchievements();
+    });
+  }
+
+/* ★ PGS: Botón para ver leaderboard del Reto del Día ★ */
+  var lbBtn = document.getElementById('btn-pgs-leaderboard');
+  if (lbBtn) {
+    lbBtn.addEventListener('click', function () {
+      PlayGamesService.showLeaderboard('daily_challenge');
     });
   }
 
@@ -445,6 +456,11 @@ function _endGame() {
   }
 
   if (isDaily) markDailyCompleted(state.score);
+
+  /* ★ PGS: Enviar puntuación al leaderboard del Reto del Día ★ */
+  if (isDaily) {
+    PlayGamesService.submitScore('daily_challenge', state.score);
+  }
 
   var newAchs = checkAchievements({
     mode: mode, score: state.score, total: total,

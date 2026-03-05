@@ -2,6 +2,7 @@
  * js/play-games.js — Integración con Google Play Games Services
  *
  * Puente entre achievements.js (logros locales) y PGS (logros de Google).
+ * Incluye soporte para LEADERBOARDS (Reto del Día).
  * Usa plugin personalizado PlayGamesPlugin (sin dependencia npm externa).
  * Solo funciona dentro de Capacitor (Android nativo).
  * En navegador web, todas las funciones son no-op (no hacen nada).
@@ -37,6 +38,15 @@ var PlayGamesService = (function () {
     'play_all_modes':  'CgkIx-P40Z4ZEAIQDA',
     'score_50':        'CgkIx-P40Z4ZEAIQDQ',
     'score_100':       'CgkIx-P40Z4ZEAIQDg'
+  };
+
+  /* ──────────────────────────────────────────────────────────────
+   * LEADERBOARDS: ID interno → ID de Google Play Games
+   *
+   * ⚠️  REEMPLAZA con el ID real generado en Play Console → Leaderboards
+   * ────────────────────────────────────────────────────────────── */
+  var LEADERBOARD_MAP = {
+    'daily_challenge': 'CgkIx-P40Z4ZEAIQDw'   /* ← REEMPLAZA con tu ID real */
   };
 
   /* ── Logros incrementales ──────────────────────────── */
@@ -190,6 +200,84 @@ var PlayGamesService = (function () {
       .catch(function (err) { console.warn('[PlayGames] Error UI logros:', err); });
   }
 
+  /* ══════════════════════════════════════════════════════
+   * LEADERBOARDS
+   * ══════════════════════════════════════════════════════ */
+
+  /**
+   * Enviar puntuación a un leaderboard.
+   * @param {string} boardId  — clave interna, ej. 'daily_challenge'
+   * @param {number} score    — puntuación (aciertos, 0-15 para daily)
+   */
+  function submitScore(boardId, score) {
+    if (!_isAvailable || !_isSignedIn) return Promise.resolve();
+
+    var googleId = LEADERBOARD_MAP[boardId];
+    if (!googleId || googleId.indexOf('REEMPLAZA') !== -1) {
+      console.warn('[PlayGames] Leaderboard ID no configurado:', boardId);
+      return Promise.resolve();
+    }
+
+    var plugin = _getPlugin();
+    if (!plugin || !plugin.submitScore) {
+      console.warn('[PlayGames] submitScore no disponible en el plugin');
+      return Promise.resolve();
+    }
+
+    console.log('[PlayGames] Enviando score:', boardId, '=', score);
+    return plugin.submitScore({ leaderboardId: googleId, score: score })
+      .then(function () {
+        console.log('[PlayGames] ✓ Score enviado:', boardId, score);
+      })
+      .catch(function (err) {
+        console.warn('[PlayGames] ✗ Error enviando score:', boardId, err);
+      });
+  }
+
+  /**
+   * Mostrar la UI nativa de un leaderboard específico.
+   * @param {string} boardId — clave interna, ej. 'daily_challenge'
+   */
+  function showLeaderboard(boardId) {
+    if (!_isAvailable || !_isSignedIn) return Promise.resolve();
+
+    var googleId = LEADERBOARD_MAP[boardId];
+    if (!googleId || googleId.indexOf('REEMPLAZA') !== -1) {
+      console.warn('[PlayGames] Leaderboard ID no configurado:', boardId);
+      return Promise.resolve();
+    }
+
+    var plugin = _getPlugin();
+    if (!plugin || !plugin.showLeaderboard) {
+      console.warn('[PlayGames] showLeaderboard no disponible en el plugin');
+      return Promise.resolve();
+    }
+
+    console.log('[PlayGames] Abriendo leaderboard:', boardId);
+    return plugin.showLeaderboard({ leaderboardId: googleId })
+      .catch(function (err) {
+        console.warn('[PlayGames] Error UI leaderboard:', boardId, err);
+      });
+  }
+
+  /**
+   * Mostrar la UI nativa con TODOS los leaderboards.
+   */
+  function showAllLeaderboards() {
+    if (!_isAvailable || !_isSignedIn) return Promise.resolve();
+
+    var plugin = _getPlugin();
+    if (!plugin || !plugin.showAllLeaderboards) {
+      /* Fallback: mostrar el específico del daily */
+      return showLeaderboard('daily_challenge');
+    }
+
+    return plugin.showAllLeaderboards()
+      .catch(function (err) {
+        console.warn('[PlayGames] Error UI all leaderboards:', err);
+      });
+  }
+
   /* ── Sincronizar logros locales existentes con PGS ─── */
 
   function syncAllLocal() {
@@ -213,8 +301,14 @@ var PlayGamesService = (function () {
       }
     });
 
+    /* También sincronizar la mejor puntuación del daily al leaderboard */
+    var dailyBest = loadBestScore ? loadBestScore('daily') : 0;
+    if (dailyBest > 0) {
+      promises.push(submitScore('daily_challenge', dailyBest));
+    }
+
     return Promise.all(promises).then(function () {
-      console.log('[PlayGames] Sync completado:', unlocked.length, 'logros');
+      console.log('[PlayGames] Sync completado:', unlocked.length, 'logros + leaderboard');
     });
   }
 
@@ -262,6 +356,11 @@ var PlayGamesService = (function () {
     showAchievements:       showAchievements,
     syncAllLocal:           syncAllLocal,
     processNewAchievements: processNewAchievements,
+    /* Leaderboards */
+    submitScore:            submitScore,
+    showLeaderboard:        showLeaderboard,
+    showAllLeaderboards:    showAllLeaderboards,
+    /* Estado */
     isAvailable:    function () { return _isAvailable; },
     isSignedIn:     function () { return _isSignedIn; },
     getPlayerInfo:  function () { return _playerInfo; }
