@@ -82,8 +82,10 @@ document.addEventListener('DOMContentLoaded', function () {
   applyDarkMode(_settings.darkMode);
   AudioFX.setEnabled(_settings.soundEnabled);
 
-  /* ★ PGS: Inicializar Google Play Games Services ★ */
+/* ★ PGS: Inicializar Google Play Games Services ★ */
+  ProfilePill.init();
   PlayGamesService.init().then(function (signedIn) {
+    ProfilePill.updateFromPGS(signedIn);
     if (signedIn) {
       console.log('[FlagMaster] PGS conectado, sincronizando logros locales...');
       PlayGamesService.syncAllLocal();
@@ -467,6 +469,7 @@ function _endGame() {
   delay(200).then(function () {
     renderResults(state.score, total, state.correct, state.wrong, state.maxStreak, isNewRecord, isDaily, mode);
     renderResultsAchievements(newAchs);
+    ProfilePill.renderResultsPlayerName();
     /* mostrar/ocultar botón de repaso */
     var revBtn = document.getElementById('btn-review');
     if (revBtn) revBtn.style.display = (state.wrongList && state.wrongList.length && !isReview) ? 'flex' : 'none';

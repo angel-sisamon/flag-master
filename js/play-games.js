@@ -6,7 +6,7 @@
  * Solo funciona dentro de Capacitor (Android nativo).
  * En navegador web, todas las funciones son no-op (no hacen nada).
  *
- * ORDEN DE CARGA: después de achievements.js, antes de main.js
+ * ORDEN DE CARGA: después de achievements.js, antes de profile-pill.js y main.js
  */
 
 var PlayGamesService = (function () {
@@ -14,6 +14,7 @@ var PlayGamesService = (function () {
   /* ── Estado interno ───────────────────────────────── */
   var _isAvailable = false;
   var _isSignedIn  = false;
+  var _playerInfo  = null; /* { displayName, avatarUrl } */
 
   /* ──────────────────────────────────────────────────────────────
    * MAPEO: ID interno de FlagMaster → ID de Google Play Games
@@ -61,6 +62,31 @@ var PlayGamesService = (function () {
     return _plugin;
   }
 
+  /* ── Obtener info del jugador tras sign-in ─────────── */
+
+  function _fetchPlayerInfo(plugin) {
+    if (!plugin || !plugin.getCurrentPlayer) {
+      console.log('[PlayGames] getCurrentPlayer no disponible');
+      return Promise.resolve(null);
+    }
+
+    return plugin.getCurrentPlayer()
+      .then(function (player) {
+        if (player) {
+          _playerInfo = {
+            displayName: player.displayName || player.name || null,
+            avatarUrl:   player.avatarImageUrl || player.iconImageUrl || player.avatarUrl || null
+          };
+          console.log('[PlayGames] Jugador:', _playerInfo.displayName);
+        }
+        return _playerInfo;
+      })
+      .catch(function (err) {
+        console.warn('[PlayGames] Error obteniendo jugador:', err);
+        return null;
+      });
+  }
+
   /* ── Inicialización ────────────────────────────────── */
 
   function init() {
@@ -78,11 +104,41 @@ var PlayGamesService = (function () {
       .then(function (result) {
         _isSignedIn = !!(result && result.isSignedIn);
         console.log('[PlayGames] Sign-in resultado:', _isSignedIn);
-        return _isSignedIn;
+
+        if (_isSignedIn) {
+          return _fetchPlayerInfo(plugin).then(function () {
+            return true;
+          });
+        }
+        return false;
       })
       .catch(function (err) {
         _isSignedIn = false;
         console.warn('[PlayGames] Sign-in falló:', err);
+        return false;
+      });
+  }
+
+  /* ── Sign-in manual (para reconexión desde UI) ─────── */
+
+  function signIn() {
+    var plugin = _getPlugin();
+    if (!plugin) return Promise.resolve(false);
+
+    _isAvailable = true;
+    return plugin.signIn()
+      .then(function (result) {
+        _isSignedIn = !!(result && result.isSignedIn);
+        if (_isSignedIn) {
+          return _fetchPlayerInfo(plugin).then(function () {
+            return true;
+          });
+        }
+        return false;
+      })
+      .catch(function (err) {
+        _isSignedIn = false;
+        console.warn('[PlayGames] Sign-in manual falló:', err);
         return false;
       });
   }
@@ -200,12 +256,14 @@ var PlayGamesService = (function () {
   /* ── API pública ───────────────────────────────────── */
   return {
     init:                   init,
+    signIn:                 signIn,
     unlockAchievement:      unlockAchievement,
     incrementAchievement:   incrementAchievement,
     showAchievements:       showAchievements,
     syncAllLocal:           syncAllLocal,
     processNewAchievements: processNewAchievements,
-    isAvailable:  function () { return _isAvailable; },
-    isSignedIn:   function () { return _isSignedIn; }
+    isAvailable:    function () { return _isAvailable; },
+    isSignedIn:     function () { return _isSignedIn; },
+    getPlayerInfo:  function () { return _playerInfo; }
   };
 })();

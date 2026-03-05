@@ -87,6 +87,8 @@ var I18N_STRINGS = {
     ob_title_1:'¡Bienvenido a FlagMaster!', ob_desc_1:'Pon a prueba tu conocimiento de banderas y países del mundo.',
     ob_title_2:'Reto del Día',              ob_desc_2:'Cada día, 15 países iguales para todos. ¡Solo una oportunidad!',
     ob_skip:'Omitir', ob_next:'Siguiente →', ob_start:'¡Empezar!',
+    profile_guest:'Invitado',
+    profile_connected_toast:'Conectado como {name}',
   },
 
   en: {
@@ -167,6 +169,8 @@ var I18N_STRINGS = {
     ob_title_1:'Welcome to FlagMaster!',   ob_desc_1:'Test your knowledge of world flags and countries.',
     ob_title_2:'Daily Challenge',           ob_desc_2:'Every day, 15 countries — the same for everyone. One shot only!',
     ob_skip:'Skip', ob_next:'Next →', ob_start:'Let\'s go!',
+    profile_guest:'Guest',
+    profile_connected_toast:'Connected as {name}',
   }
 };
 

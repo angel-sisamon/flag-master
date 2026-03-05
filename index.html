@@ -9,6 +9,7 @@
   <title>FlagMaster</title>
   <link rel="stylesheet" href="css/styles.css"/>
   <link rel="stylesheet" href="css/animations.css"/>
+  <link rel="stylesheet" href="css/profile-pill.css"/>
 </head>
 <body class="dark">
 
@@ -27,6 +28,15 @@
         <span class="home-brand-name">FlagMaster</span>
       </div>
       <div class="home-topbar-actions">
+        <!-- ★ NUEVO: Profile Pill ★ -->
+        <button class="home-profile-pill profile-pill--guest" id="btn-profile">
+          <img class="profile-avatar" id="profile-avatar"
+               src="" alt="" style="display:none" />
+          <span class="profile-icon" id="profile-icon">👤</span>
+          <span class="profile-name" id="profile-name">Invitado</span>
+          <span class="profile-status-dot dot-offline" id="profile-status-dot"></span>
+        </button>
+        <!-- Fin Profile Pill -->
         <!-- Stats pill -->
         <div class="home-record-pill">
           <span>🏆</span>
@@ -153,6 +163,8 @@
     <div class="results-trophy" id="results-trophy">🏆</div>
     <h2 class="results-title"   id="results-title">¡Partida completada!</h2>
     <p  class="results-subtitle" id="results-subtitle">Resultados</p>
+
+    <div class="results-player-badge" id="results-player-name" style="display:none"></div>
 
     <div class="results-score-big card">
       <span class="results-score-num"   id="results-score-num">0</span>
@@ -390,6 +402,7 @@
 <script src="js/daily.js"></script>
 <script src="js/achievements.js"></script>
 <script src="js/play-games.js"></script>
+<script src="js/profile-pill.js"></script>
 <script src="js/ranking.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
