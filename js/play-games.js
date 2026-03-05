@@ -25,17 +25,17 @@ var PlayGamesService = (function () {
     'first_correct':   'CgkIx-P40Z4ZEAIQAQ',
     'streak_3':        'CgkIx-P40Z4ZEAIQAg',
     'streak_5':        'CgkIx-P40Z4ZEAIQAw',
-    'streak_10':       'CgkI_REEMPLAZA_CON_ID_REAL_4',
-    'perfect_game':    'CgkI_REEMPLAZA_CON_ID_REAL_5',
-    'no_mistakes':     'CgkI_REEMPLAZA_CON_ID_REAL_6',
-    'daily_first':     'CgkI_REEMPLAZA_CON_ID_REAL_7',
-    'daily_3':         'CgkI_REEMPLAZA_CON_ID_REAL_8',
-    'time_attack_10':  'CgkI_REEMPLAZA_CON_ID_REAL_9',
-    'time_attack_20':  'CgkI_REEMPLAZA_CON_ID_REAL_10',
-    'play_5_games':    'CgkI_REEMPLAZA_CON_ID_REAL_11',
-    'play_all_modes':  'CgkI_REEMPLAZA_CON_ID_REAL_12',
-    'score_50':        'CgkI_REEMPLAZA_CON_ID_REAL_13',
-    'score_100':       'CgkI_REEMPLAZA_CON_ID_REAL_14'
+    'streak_10':       'CgkIx-P40Z4ZEAIQBA',
+    'perfect_game':    'CgkIx-P40Z4ZEAIQBQ',
+    'no_mistakes':     'CgkIx-P40Z4ZEAIQBg',
+    'daily_first':     'CgkIx-P40Z4ZEAIQBw',
+    'daily_3':         'CgkIx-P40Z4ZEAIQCA',
+    'time_attack_10':  'CgkIx-P40Z4ZEAIQCQ',
+    'time_attack_20':  'CgkIx-P40Z4ZEAIQCg',
+    'play_5_games':    'CgkIx-P40Z4ZEAIQCw',
+    'play_all_modes':  'CgkIx-P40Z4ZEAIQDA',
+    'score_50':        'CgkIx-P40Z4ZEAIQDQ',
+    'score_100':       'CgkIx-P40Z4ZEAIQDg'
   };
 
   /* ── Logros incrementales ──────────────────────────── */
