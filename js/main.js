@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
   applyDarkMode(_settings.darkMode);
   AudioFX.setEnabled(_settings.soundEnabled);
 
-/* ★ PGS: Inicializar Google Play Games Services ★ */
+  /* ★ PGS: Inicializar Google Play Games Services ★ */
   ProfilePill.init();
   PlayGamesService.init().then(function (signedIn) {
     ProfilePill.updateFromPGS(signedIn);
@@ -91,10 +91,9 @@ document.addEventListener('DOMContentLoaded', function () {
       PlayGamesService.syncAllLocal();
       var pgsBtn = document.getElementById('btn-pgs-achievements');
       if (pgsBtn) pgsBtn.style.display = 'block';
-
-      var lbBtn = document.getElementById('btn-pgs-leaderboard');
-      if (lbBtn) lbBtn.style.display = 'block';
     }
+    /* Actualizar botón de jugar tras conocer estado PGS */
+    _updatePlayButton();
   });
 
   initSettingsEvents(function (ns) {
@@ -111,12 +110,23 @@ document.addEventListener('DOMContentLoaded', function () {
   _refreshBestScore();
   updateDailyCardUI();
   _updateDailyStreakUI();
+  _updatePlayButton();
   initRankingFilters();
 
+  /* ── Botón JUGAR (con lógica de leaderboard) ── */
   document.getElementById('btn-play').addEventListener('click', function () {
     AudioFX.resume();
-    _launchSelected();
+    var action = this.dataset.action || 'play';
+    if (action === 'leaderboard') {
+      PlayGamesService.showLeaderboard('daily_challenge');
+    } else if (action === 'done') {
+      /* Daily completado pero sin PGS → mostrar alerta */
+      alert(t('daily_already'));
+    } else {
+      _launchSelected();
+    }
   });
+
   document.getElementById('btn-settings-home').addEventListener('click', function () {
     showSettingsModal(_settings);
   });
@@ -161,7 +171,9 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('btn-home').addEventListener('click', function () {
     _gameActive = false; _stopAll(); _refreshBestScore();
-    updateDailyCardUI(); _updateDailyStreakUI(); showScreen('home');
+    updateDailyCardUI(); _updateDailyStreakUI();
+    _updatePlayButton();
+    showScreen('home');
   });
 
   document.getElementById('btn-back-ranking').addEventListener('click', function () { showScreen('home'); });
@@ -176,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-/* ★ PGS: Botón para ver leaderboard del Reto del Día ★ */
+  /* ★ PGS: Botón para ver leaderboard del Reto del Día (en resultados) ★ */
   var lbBtn = document.getElementById('btn-pgs-leaderboard');
   if (lbBtn) {
     lbBtn.addEventListener('click', function () {
@@ -197,6 +209,40 @@ document.addEventListener('DOMContentLoaded', function () {
   _initOnboarding();
 });
 
+/* ══════════════════════════════════════════════════════════════
+   BOTÓN JUGAR — cambia según contexto (play / leaderboard / done)
+   ══════════════════════════════════════════════════════════════ */
+
+/**
+ * Actualiza el texto, estilo y acción del botón principal de jugar.
+ *
+ * - daily completado + PGS conectado → "🏆 Ranking Global" (abre leaderboard nativo)
+ * - daily completado + PGS no        → "📅 Ya completado" (muestra alerta)
+ * - cualquier otro caso              → "JUGAR" (lanza partida)
+ */
+function _updatePlayButton() {
+  var btn = document.getElementById('btn-play');
+  if (!btn) return;
+
+  var isDaily = _selectedModeId === 'daily';
+  var done    = isDaily && isDailyCompleted();
+  var pgsOn   = PlayGamesService.isSignedIn();
+
+  if (done && pgsOn) {
+    btn.textContent    = '🏆 ' + t('leaderboard_daily');
+    btn.dataset.action = 'leaderboard';
+    btn.classList.add('btn-play-main--leaderboard');
+  } else if (done && !pgsOn) {
+    btn.textContent    = '📅 ' + t('home_daily_done');
+    btn.dataset.action = 'done';
+    btn.classList.remove('btn-play-main--leaderboard');
+  } else {
+    btn.textContent    = t('home_play');
+    btn.dataset.action = 'play';
+    btn.classList.remove('btn-play-main--leaderboard');
+  }
+}
+
 /* ── Home menu (acordeón) ──────────────────────────────────── */
 function _renderHomeMenu() {
   var container = document.getElementById('mode-list');
@@ -212,7 +258,7 @@ function _renderHomeMenu() {
   });
 
   _updateHeroVisual(_selectedModeId);
-  document.getElementById('btn-play').textContent = t('home_play');
+  _updatePlayButton();
 }
 
 /** Construye la tarjeta standalone del Reto del Día */
@@ -307,6 +353,7 @@ function _selectMode(id) {
     } else if (!sel && check) { check.remove(); }
   });
   _updateHeroVisual(id);
+  _updatePlayButton();
   vibrateDevice([18], _settings.vibration);
 }
 
@@ -486,9 +533,15 @@ function _endGame() {
     renderResults(state.score, total, state.correct, state.wrong, state.maxStreak, isNewRecord, isDaily, mode);
     renderResultsAchievements(newAchs);
     ProfilePill.renderResultsPlayerName();
+
     /* mostrar/ocultar botón de repaso */
     var revBtn = document.getElementById('btn-review');
     if (revBtn) revBtn.style.display = (state.wrongList && state.wrongList.length && !isReview) ? 'flex' : 'none';
+
+    /* ★ PGS: Mostrar botón de leaderboard en resultados si es daily + PGS conectado ★ */
+    var lbBtn = document.getElementById('btn-pgs-leaderboard');
+    if (lbBtn) lbBtn.style.display = (isDaily && PlayGamesService.isSignedIn()) ? 'flex' : 'none';
+
     showScreen('results');
     if (state.score / Math.max(total, 1) >= 0.7) {
       delay(400).then(function () { launchConfetti(document.getElementById('confetti-canvas')); });

@@ -89,6 +89,8 @@ var I18N_STRINGS = {
     ob_skip:'Omitir', ob_next:'Siguiente →', ob_start:'¡Empezar!',
     profile_guest:'Invitado',
     profile_connected_toast:'Conectado como {name}',
+    leaderboard_daily: 'Ranking Global',
+    pgs_achievements: 'Logros Google Play',
   },
 
   en: {
@@ -171,6 +173,8 @@ var I18N_STRINGS = {
     ob_skip:'Skip', ob_next:'Next →', ob_start:'Let\'s go!',
     profile_guest:'Guest',
     profile_connected_toast:'Connected as {name}',
+    leaderboard_daily: 'Global Ranking',
+    pgs_achievements: 'Google Play Achievements',
   }
 };
 

@@ -723,3 +723,29 @@ body.light .name-input { background:#f0f0f8; }
 
 /* ── Chip idioma en ajustes ─────────────────────────────── */
 #chips-lang .chip { min-width:56px; }
+
+/* ── Play button: modo leaderboard ─────────────────────────── */
+.btn-play-main--leaderboard {
+  background:linear-gradient(170deg, #7c3aed 0%, #4f46e5 60%, #3730a3 100%);
+  color:#fff;
+  box-shadow: 0 4px 0 #312e81, 0 6px 24px rgba(79,70,229,.5);
+  font-size:1.05rem;
+  letter-spacing:.02em;
+}
+.btn-play-main--leaderboard:active {
+  box-shadow:0 1px 0 #312e81, 0 2px 10px rgba(79,70,229,.4);
+}
+/* Light mode */
+body.light .btn-play-main--leaderboard {
+  background:linear-gradient(170deg, #6d28d9 0%, #4338ca 60%, #3730a3 100%);
+  box-shadow: 0 4px 0 #312e81, 0 6px 24px rgba(67,56,202,.35);
+}
+
+/* btn--outline (para botones PGS en logros y resultados) */
+.btn--outline {
+  background:var(--card-bg);
+  color:var(--text);
+  border:1.5px solid var(--border);
+  font-weight:600;
+}
+.btn--outline:hover { background:var(--card-bg-h); }

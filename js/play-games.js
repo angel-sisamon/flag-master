@@ -46,7 +46,7 @@ var PlayGamesService = (function () {
    * ⚠️  REEMPLAZA con el ID real generado en Play Console → Leaderboards
    * ────────────────────────────────────────────────────────────── */
   var LEADERBOARD_MAP = {
-    'daily_challenge': 'CgkIx-P40Z4ZEAIQDw'   /* ← REEMPLAZA con tu ID real */
+    'daily_challenge': 'CgkIx-P40Z4ZEAIQDw'
   };
 
   /* ── Logros incrementales ──────────────────────────── */
