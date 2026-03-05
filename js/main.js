@@ -82,6 +82,16 @@ document.addEventListener('DOMContentLoaded', function () {
   applyDarkMode(_settings.darkMode);
   AudioFX.setEnabled(_settings.soundEnabled);
 
+  /* ★ PGS: Inicializar Google Play Games Services ★ */
+  PlayGamesService.init().then(function (signedIn) {
+    if (signedIn) {
+      console.log('[FlagMaster] PGS conectado, sincronizando logros locales...');
+      PlayGamesService.syncAllLocal();
+      var pgsBtn = document.getElementById('btn-pgs-achievements');
+      if (pgsBtn) pgsBtn.style.display = 'block';
+    }
+  });
+
   initSettingsEvents(function (ns) {
     _settings = ns;
     applyDarkMode(ns.darkMode);
@@ -152,6 +162,14 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('btn-back-ranking').addEventListener('click', function () { showScreen('home'); });
   document.getElementById('btn-back-achievements').addEventListener('click', function () { showScreen('home'); });
   document.getElementById('btn-back-stats').addEventListener('click', function () { showScreen('home'); });
+
+  /* ★ PGS: Botón para ver logros nativos de Google Play Games ★ */
+  var pgsBtn = document.getElementById('btn-pgs-achievements');
+  if (pgsBtn) {
+    pgsBtn.addEventListener('click', function () {
+      PlayGamesService.showAchievements();
+    });
+  }
 
   document.addEventListener('keydown', _handleKeyboard);
   document.addEventListener('keydown', function (e) {
@@ -432,6 +450,17 @@ function _endGame() {
     maxStreak: state.maxStreak, isDaily: isDaily
   });
 
+  /* ★ PGS: Enviar logros a Google Play Games Services ★ */
+  PlayGamesService.processNewAchievements(newAchs, {
+    correct:   state.correct,
+    wrong:     state.wrong,
+    score:     state.score,
+    total:     total,
+    mode:      mode,
+    isDaily:   isDaily,
+    maxStreak: state.maxStreak
+  });
+
   if (isTA) { AudioFX.timeUp(); }
   else { AudioFX.complete(); }
 
@@ -492,6 +521,7 @@ function _handleKeyboard(e) {
     var nb = document.getElementById('btn-next'); if (nb && nb.style.display !== 'none') nb.click();
   }
 }
+
 /* ── Onboarding primer uso ─────────────────────────────────── */
 function _initOnboarding() {
   if (storageLoad('onboarding_done')) return; /* ya lo vio */
