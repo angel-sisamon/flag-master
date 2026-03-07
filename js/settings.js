@@ -1,5 +1,8 @@
 /**
  * js/settings.js
+ *
+ * CAMBIOS v4.1:
+ *  - Selector de continente integrado en el modal de ajustes
  */
 function getChipValue(id) { var a=document.querySelector('#'+id+' .chip.active'); return a?a.dataset.value:null; }
 function setChipActive(id, v) { document.querySelectorAll('#'+id+' .chip').forEach(function(c){c.classList.toggle('active',c.dataset.value===v);}); }
@@ -24,6 +27,12 @@ function syncSettingsUI(s) {
   if(g)g.style.display=s.timerEnabled?'flex':'none';
   /* lang chips */
   setChipActive('chips-lang', getLang ? getLang() : 'es');
+  /* ★ Sincronizar selector de continente ★ */
+  var contSel = document.getElementById('continent-select');
+  if (contSel) {
+    var saved = (typeof storageLoad === 'function') ? storageLoad('last_continent', 'all') : 'all';
+    contSel.value = saved || 'all';
+  }
 }
 
 function readSettingsUI() {
@@ -74,6 +83,11 @@ function initSettingsEvents(onSaved) {
     /* aplicar idioma si cambió */
     var langChip = document.querySelector('#chips-lang .chip.active');
     if (langChip && typeof setLang === 'function') setLang(langChip.dataset.lang);
+    /* ★ Guardar continente seleccionado ★ */
+    var contSel = document.getElementById('continent-select');
+    if (contSel && typeof storageSave === 'function') {
+      storageSave('last_continent', contSel.value);
+    }
     if(typeof onSaved==='function')onSaved(s);
   });
   document.getElementById('btn-close-settings').addEventListener('click',hideSettingsModal);

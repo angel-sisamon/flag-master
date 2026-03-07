@@ -1,5 +1,9 @@
 /**
  * js/ui.js — Renderizado DOM. Emojis 100% offline. i18n integrado.
+ *
+ * CAMBIOS v4.1:
+ *  - showAnswerFeedback ya NO muestra el btn-next (auto-avance en main.js)
+ *  - country-display forzado a flex-direction:column para alineación vertical
  */
 var OPTION_BADGES=['A','B','C','D'];
 var _CIRC=2*Math.PI*18;
@@ -67,8 +71,13 @@ function renderQuestion(question, mode, animate, onAnswer) {
     if(cntryDisp) cntryDisp.style.display='none';
     if(flagWrap) flagWrap.innerHTML='<span class="flag-emoji-lg">'+question.correct.flag+'</span>';
   } else {
+    /* ★ Modo guess-flag: alineación vertical (pregunta arriba, país debajo) ★ */
     if(flagDisp) flagDisp.style.display='none';
-    if(cntryDisp) cntryDisp.style.display='flex';
+    if(cntryDisp) {
+      cntryDisp.style.display='flex';
+      cntryDisp.style.flexDirection='column';
+      cntryDisp.style.alignItems='center';
+    }
     if(cntryLbl) cntryLbl.textContent=cn(question.correct);
     var prompt=document.getElementById('country-prompt-label');
     if(prompt) prompt.textContent=t('game_flag_prompt');
@@ -121,8 +130,10 @@ function showAnswerFeedback(isCorrect, selectedIndex, correctIndex, correctCount
     var flipper=document.getElementById('card-flipper');
     if (flipper) flipper.classList.add('flipped');
   },320);
-  var next=document.getElementById('btn-next');
-  if (next) { next.textContent=t('game_next'); next.style.display='flex'; }
+
+  /* ★ CAMBIO v4.1: Ya NO mostramos btn-next. El auto-avance en main.js se encarga. ★ */
+  /* var next=document.getElementById('btn-next');
+     if (next) { next.textContent=t('game_next'); next.style.display='flex'; } */
 }
 
 /* ── Timer ────────────────────────────────────────── */
@@ -220,51 +231,27 @@ function shareResult(score, total, isTA, isDaily) {
 
   /* 2. Fallback — copiar al portapapeles + toast (por si el plugin no está instalado) */
   var toastMsg = lang==='en' ? 'Result copied!' : '¡Resultado copiado!';
-  var fullText = title + '\n' + text;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(fullText).then(function() { _showCopyToast(toastMsg); }).catch(function(){});
-  } else {
-    /* último fallback: execCommand para WebViews antiguos */
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = fullText; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      _showCopyToast(toastMsg);
-    } catch(e) {}
+    navigator.clipboard.writeText(title + '\n' + text).then(function () {
+      var toastEl = document.getElementById('achievement-toast');
+      var icon    = document.getElementById('achievement-toast-icon');
+      var name    = document.getElementById('achievement-toast-name');
+      var label   = document.getElementById('achievement-toast-label');
+      if (toastEl) {
+        if (icon)  icon.textContent  = '📋';
+        if (name)  name.textContent  = toastMsg;
+        if (label) label.textContent = '';
+        toastEl.style.display = 'flex';
+        toastEl.classList.remove('toast-hide');
+        toastEl.classList.add('toast-show');
+        setTimeout(function () {
+          toastEl.classList.add('toast-hide');
+          setTimeout(function () {
+            toastEl.style.display = 'none';
+            toastEl.classList.remove('toast-show', 'toast-hide');
+          }, 400);
+        }, 2000);
+      }
+    }).catch(function(){});
   }
-}
-
-function _showCopyToast(msg) {
-  var toastEl = document.getElementById('achievement-toast');
-  var icon    = document.getElementById('achievement-toast-icon');
-  var name    = document.getElementById('achievement-toast-name');
-  var label   = document.getElementById('achievement-toast-label');
-  if (!toastEl) return;
-  if (icon)  icon.textContent  = '📋';
-  if (name)  name.textContent  = msg;
-  if (label) label.textContent = '';
-  toastEl.style.display = 'flex';
-  toastEl.classList.remove('toast-hide'); toastEl.classList.add('toast-show');
-  setTimeout(function(){
-    toastEl.classList.add('toast-hide');
-    setTimeout(function(){ toastEl.style.display='none'; toastEl.classList.remove('toast-show','toast-hide'); }, 400);
-  }, 2000);
-}
-
-/* ── Modal salir ──────────────────────────────────── */
-function showQuitModal(onConfirm, onCancel) {
-  var modal=document.getElementById('modal-quit');
-  var ok=document.getElementById('btn-quit-confirm');
-  var no=document.getElementById('btn-quit-cancel');
-  document.getElementById('quit-modal-title').textContent=t('quit_title');
-  document.getElementById('quit-modal-body').textContent=t('quit_body');
-  ok.textContent=t('btn_quit'); no.textContent=t('btn_cancel');
-  modal.style.display='flex';
-  function cleanup(){modal.style.display='none';ok.removeEventListener('click',hOk);no.removeEventListener('click',hNo);}
-  function hOk(){cleanup();if(onConfirm)onConfirm();}
-  function hNo(){cleanup();if(onCancel)onCancel();}
-  ok.addEventListener('click',hOk,{once:true});
-  no.addEventListener('click',hNo,{once:true});
 }

@@ -35,11 +35,6 @@
           <span class="profile-name" id="profile-name">Invitado</span>
           <span class="profile-status-dot dot-offline" id="profile-status-dot"></span>
         </button>
-        <div class="home-record-pill">
-          <span>🏆</span>
-          <span class="record-label" data-i18n="home_record">Récord</span>
-          <span id="home-best-score" class="record-val">—</span>
-        </div>
       </div>
     </header>
 
@@ -57,19 +52,6 @@
 
     <!-- DAILY STREAK -->
     <div id="daily-streak-label" class="daily-streak-banner" style="display:none"></div>
-
-    <!-- CONTINENT SELECTOR -->
-    <div class="continent-wrap">
-      <label class="continent-label" data-i18n="settings_continent">Continente</label>
-      <select id="continent-select" class="continent-select">
-        <option value="all" data-i18n="continent_all">Todos</option>
-        <option value="eu"  data-i18n="continent_eu">Europa</option>
-        <option value="am"  data-i18n="continent_am">América</option>
-        <option value="as"  data-i18n="continent_as">Asia</option>
-        <option value="af"  data-i18n="continent_af">África</option>
-        <option value="oc"  data-i18n="continent_oc">Oceanía</option>
-      </select>
-    </div>
 
     <!-- BOTTOM ACTION BAR -->
     <div class="home-action-bar">
@@ -218,18 +200,15 @@
 <div id="modal-leaderboard" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
   <div class="modal-panel card modal-panel-lb">
 
-    <!-- Header con navegación de fecha -->
+    <!-- Header con navegación de fecha (swipe only, sin flechas ni X) -->
     <div class="lb-header">
       <span class="lb-header-title" data-i18n="lb_subtitle">Reto del Día</span>
       <div class="lb-date-nav">
-        <button class="lb-nav-btn" id="lb-prev" aria-label="Día anterior">‹</button>
         <div class="lb-date-center">
           <span class="lb-date-label" id="lb-date-label">Hoy</span>
           <span class="lb-today-badge" id="lb-today-badge">EN VIVO</span>
         </div>
-        <button class="lb-nav-btn" id="lb-next" aria-label="Día siguiente">›</button>
       </div>
-      <button class="lb-close-btn" id="btn-close-leaderboard" aria-label="Cerrar">✕</button>
     </div>
 
     <!-- Participantes -->
@@ -309,6 +288,17 @@
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
           <span class="toggle-label-text" data-i18n="settings_vib_on">Vibrar al responder</span>
         </label>
+      </div>
+      <div class="setting-group">
+        <label class="setting-label" data-i18n="settings_continent">Continente</label>
+        <select id="continent-select" class="continent-select continent-select--settings">
+          <option value="all" data-i18n="continent_all">Todos</option>
+          <option value="eu"  data-i18n="continent_eu">Europa</option>
+          <option value="am"  data-i18n="continent_am">América</option>
+          <option value="as"  data-i18n="continent_as">Asia</option>
+          <option value="af"  data-i18n="continent_af">África</option>
+          <option value="oc"  data-i18n="continent_oc">Oceanía</option>
+        </select>
       </div>
       <div class="setting-group">
         <label class="toggle-switch">

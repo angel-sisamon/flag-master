@@ -2,6 +2,11 @@
  * js/main.js — FlagMaster v4
  *
  * Nombres internos de modo: 'guess-country' | 'guess-flag' | 'timetrial' | 'daily' | 'review'
+ *
+ * CAMBIOS v4.1:
+ *  - Auto-avance 1.5s en TODOS los modos (sin botón "Siguiente")
+ *  - Selector de continente movido a Ajustes (ya no en home)
+ *  - Eliminado el pill de récord del topbar
  */
 
 var MODE_GROUPS = [
@@ -85,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
     _settings = ns;
     applyDarkMode(ns.darkMode);
     AudioFX.setEnabled(ns.soundEnabled);
+    /* ★ Leer continente desde ajustes ★ */
+    _selectedContinent = _readContinentFromSettings();
     _renderHomeMenu();
     _refreshBestScore();
     updateDailyCardUI();
@@ -122,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('btn-achievements-home').addEventListener('click', function () { renderAchievementsScreen(); showScreen('achievements'); });
   document.getElementById('btn-stats-home').addEventListener('click', function () { renderStatsScreen(); showScreen('stats'); });
 
+  /* btn-next se mantiene como fallback por si el auto-avance falla */
   document.getElementById('btn-next').addEventListener('click', _handleNext);
   document.getElementById('btn-quit').addEventListener('click', function () {
     _pauseAll();
@@ -170,9 +178,21 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   showScreen('home');
-  _initContinentSelector();
+  /* ★ Selector de continente ahora está en Ajustes, no en Home ★ */
   _initOnboarding();
 });
+
+/* ══════════════════════════════════════════════════════════════
+   LEER CONTINENTE DESDE AJUSTES
+   ══════════════════════════════════════════════════════════════ */
+function _readContinentFromSettings() {
+  var sel = document.getElementById('continent-select');
+  if (sel) {
+    storageSave('last_continent', sel.value);
+    return sel.value;
+  }
+  return storageLoad('last_continent', 'all') || 'all';
+}
 
 /* ══════════════════════════════════════════════════════════════
    BOTÓN JUGAR
@@ -230,13 +250,14 @@ function _buildSoloCard(mode) {
 
 function _buildGroupBlock(group) {
   var isOpen = !!_groupExpanded[group.id];
-  var wrap = document.createElement('div'); wrap.className = 'mode-group'; wrap.dataset.group = group.id;
+  var wrap = document.createElement('div'); wrap.className = 'mode-group';
+
   var header = document.createElement('button');
   header.className = 'mode-group-header' + (isOpen ? ' mode-group-header--open' : '');
-  header.innerHTML =
-    '<span class="mode-group-icon">' + group.icon + '</span>' +
+  header.innerHTML = '<span class="mode-group-icon">' + group.icon + '</span>' +
     '<span class="mode-group-name">' + t(group.nameKey) + '</span>' +
     '<span class="mode-group-arrow">' + (isOpen ? '▾' : '▸') + '</span>';
+
   var children = document.createElement('div');
   children.className = 'mode-group-children' + (isOpen ? ' mode-group-children--open' : '');
 
@@ -251,9 +272,10 @@ function _buildGroupBlock(group) {
       '<span class="mode-card-icon">' + mode.visualBig + '</span>' +
       '<div class="mode-card-text">' +
         '<span class="mode-card-name">' + t(keys.name) + '</span>' +
-        '<span class="mode-card-desc">' + t(keys.desc) + '</span>' +
+        '<span class="mode-card-desc">' + t(keys.desc) +
+          (!mode.active ? ' <span class="mode-card-badge">' + t('home_coming_soon') + '</span>' : '') +
+        '</span>' +
       '</div>' +
-      (!mode.active ? '<span class="mode-card-lock">' + t('home_coming_soon') + '</span>' : '') +
       (mode.id === _selectedModeId ? '<span class="mode-card-check">✓</span>' : '');
     if (mode.active) { card.addEventListener('click', function () { _selectMode(mode.id); }); }
     children.appendChild(card);
@@ -294,6 +316,8 @@ function _updateHeroVisual(id) {
 /* ── Arranque ─────────────────────────────────────────────── */
 function _launchSelected() {
   _settings = loadSettings(); AudioFX.setEnabled(_settings.soundEnabled);
+  /* ★ Releer continente desde ajustes ★ */
+  _selectedContinent = storageLoad('last_continent', 'all') || 'all';
   var hero = document.getElementById('hero-visual');
   if (hero) { hero.classList.add('hero-launch'); setTimeout(function(){ hero.classList.remove('hero-launch'); }, 400); }
 
@@ -347,6 +371,9 @@ function _renderCurrentQuestion(animate) {
   if (!isTA && _settings.timerEnabled) { _startPerQuestionTimer(_settings.timerDuration); }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   ★ RESPUESTA + AUTO-AVANCE (1.5s en TODOS los modos) ★
+   ══════════════════════════════════════════════════════════════ */
 function _handleAnswer(optionIndex) {
   if (!_gameActive) return; _stopPerQuestionTimer();
   if (_autoAdvance) { clearTimeout(_autoAdvance); _autoAdvance = null; }
@@ -356,8 +383,18 @@ function _handleAnswer(optionIndex) {
   else { AudioFX.wrong(); }
   showAnswerFeedback(result.isCorrect, optionIndex, result.correctIndex, getCurrentQuestion().correct);
   var state = getGameState();
-  if (state.isTimeTrial) { updateHUDScoreOnly(state.score, state.streak); _autoAdvance = setTimeout(function () { _autoAdvance = null; _handleNext(); }, 1400); }
+  if (state.isTimeTrial) { updateHUDScoreOnly(state.score, state.streak); }
   else { updateHUD(state.score, state.streak, state.currentIndex, getTotalQuestions()); }
+
+  /* ★ Auto-avance: 1.5s para TODOS los modos (era solo timetrial antes) ★ */
+  /* El botón "Siguiente" permanece oculto; el btn-next se mantiene en HTML como fallback */
+  var btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.style.display = 'none';
+
+  _autoAdvance = setTimeout(function () {
+    _autoAdvance = null;
+    _handleNext();
+  }, 1500);
 }
 
 function _handleNext() {
@@ -457,7 +494,7 @@ function _refreshBestScore() { renderHomeBestScore(loadBestScore(_selectedModeId
 function _handleKeyboard(e) {
   if (!_gameActive) return; var state = getGameState(); if (!state) return;
   if (['1','2','3','4'].indexOf(e.key) !== -1 && !state.answered) { var b = document.querySelectorAll('.option-btn')[parseInt(e.key,10)-1]; if (b) b.click(); return; }
-  if ((e.key === 'Enter' || e.key === ' ') && state.answered) { e.preventDefault(); var nb = document.getElementById('btn-next'); if (nb && nb.style.display !== 'none') nb.click(); }
+  /* ★ Ya no se necesita Enter/Espacio para avanzar (auto-avance) ★ */
 }
 
 /* ── Onboarding ──────────────────────────────────────────── */
@@ -516,7 +553,8 @@ function renderStatsScreen() {
   var modeNames = {'guess-country':t('mode_guess_country'),'guess-flag':t('mode_guess_flag'),'timetrial':t('mode_time_attack'),'daily':t('mode_daily')};
   var modeCounts = {}; loadRanking().forEach(function(e){modeCounts[e.mode]=(modeCounts[e.mode]||0)+1;});
   var favMode = Object.keys(modeCounts).sort(function(a,b){return modeCounts[b]-modeCounts[a];})[0];
-  var accuracy = stats.total_games > 0 ? Math.min(Math.round((stats.total_correct/Math.max(stats.total_games*10,1))*100),100) : 0;
+  var accuracy = stats.total_games > 0 ?
+    Math.min(Math.round((stats.total_correct/Math.max(stats.total_games*10,1))*100),100) : 0;
   var streak = getDailyStreak(); var wrong = getTopWrongCountries(5);
   var html = '<div class="stats-grid">';
   function stat(l,v){return '<div class="stat-card card"><span class="stat-val">'+v+'</span><span class="stat-label">'+l+'</span></div>';}
@@ -536,10 +574,4 @@ function renderStatsScreen() {
     html+='</div></div>';
   }
   wrap.innerHTML=html;
-}
-
-function _initContinentSelector() {
-  var sel = document.getElementById('continent-select'); if (!sel) return;
-  sel.value = _selectedContinent;
-  sel.addEventListener('change', function(){ _selectedContinent=sel.value; storageSave('last_continent',_selectedContinent); });
 }
