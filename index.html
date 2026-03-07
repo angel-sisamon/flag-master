@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/styles.css"/>
   <link rel="stylesheet" href="css/animations.css"/>
   <link rel="stylesheet" href="css/profile-pill.css"/>
+  <link rel="stylesheet" href="css/leaderboard.css"/>
 </head>
 <body class="dark">
 
@@ -216,19 +217,44 @@
 <!-- ═══════════════════════════════ MODAL: LEADERBOARD GLOBAL ═════════════════════ -->
 <div id="modal-leaderboard" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
   <div class="modal-panel card modal-panel-lb">
-    <div class="modal-header">
-      <h3 class="modal-title" id="lb-modal-title">🏆 Ranking del Día</h3>
-      <button class="btn-icon-only" id="btn-close-leaderboard">✕</button>
+
+    <!-- Header con navegación de fecha -->
+    <div class="lb-header">
+      <span class="lb-header-title" data-i18n="lb_subtitle">Reto del Día</span>
+      <div class="lb-date-nav">
+        <button class="lb-nav-btn" id="lb-prev" aria-label="Día anterior">‹</button>
+        <div class="lb-date-center">
+          <span class="lb-date-label" id="lb-date-label">Hoy</span>
+          <span class="lb-today-badge" id="lb-today-badge">EN VIVO</span>
+        </div>
+        <button class="lb-nav-btn" id="lb-next" aria-label="Día siguiente">›</button>
+      </div>
+      <button class="lb-close-btn" id="btn-close-leaderboard" aria-label="Cerrar">✕</button>
     </div>
-    <div class="modal-body" id="lb-modal-body" style="padding:.6rem 0">
-      <div class="lb-loading" id="lb-loading"><span class="lb-spinner"></span><span data-i18n="lb_loading">Cargando ranking...</span></div>
+
+    <!-- Participantes -->
+    <p class="lb-participants" id="lb-participants" style="display:none"></p>
+
+    <!-- Área swipeable -->
+    <div class="lb-swipe-area" id="lb-swipe-area">
+      <div class="lb-loading" id="lb-loading" style="display:none">
+        <span class="lb-spinner"></span>
+        <span data-i18n="lb_loading">Cargando ranking...</span>
+      </div>
       <div class="lb-list" id="lb-list" style="display:none"></div>
-      <p class="lb-empty" id="lb-empty" style="display:none" data-i18n="lb_empty">Nadie ha jugado aún hoy. ¡Sé el primero!</p>
-      <p class="lb-error" id="lb-error" style="display:none" data-i18n="lb_error">No se pudo cargar el ranking.</p>
+      <p class="lb-empty" id="lb-empty" style="display:none"></p>
+      <p class="lb-error" id="lb-error" style="display:none"></p>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" id="btn-lb-close">Cerrar</button>
+
+    <!-- Indicador swipe -->
+    <p class="lb-swipe-hint" data-i18n="lb_swipe_hint">← desliza para cambiar de día →</p>
+
+    <!-- Footer -->
+    <div class="lb-footer">
+      <button class="btn btn-lb-share" id="btn-lb-share" style="display:none">📤 <span data-i18n="lb_share">Compartir</span></button>
+      <button class="btn btn-lb-close-foot" id="btn-lb-close" data-i18n="btn_cancel">Cerrar</button>
     </div>
+
   </div>
 </div>
 
@@ -390,6 +416,7 @@
 <script src="js/play-games.js"></script>
 <script src="js/profile-pill.js"></script>
 <script src="js/firebase-leaderboard.js"></script>
+<script src="js/leaderboard-ui.js"></script>
 <script src="js/ranking.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>

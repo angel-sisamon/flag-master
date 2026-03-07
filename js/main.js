@@ -68,12 +68,12 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ★ Firebase Leaderboard ★ */
   FirebaseLeaderboard.init();
 
-  /* ★ PGS: Inicializar Google Play Games Services ★ */
+  /* ★ PGS ★ */
   ProfilePill.init();
   PlayGamesService.init().then(function (signedIn) {
     ProfilePill.updateFromPGS(signedIn);
     if (signedIn) {
-      console.log('[FlagMaster] PGS conectado, sincronizando logros locales...');
+      console.log('[FlagMaster] PGS conectado, sincronizando...');
       PlayGamesService.syncAllLocal();
       var pgsBtn = document.getElementById('btn-pgs-achievements');
       if (pgsBtn) pgsBtn.style.display = 'block';
@@ -98,12 +98,12 @@ document.addEventListener('DOMContentLoaded', function () {
   _updatePlayButton();
   initRankingFilters();
 
-  /* ── Botón JUGAR (con lógica leaderboard) ── */
+  /* ── Botón JUGAR ── */
   document.getElementById('btn-play').addEventListener('click', function () {
     AudioFX.resume();
     var action = this.dataset.action || 'play';
     if (action === 'leaderboard') {
-      _showLeaderboardModal();
+      LeaderboardUI.open();
     } else if (action === 'done') {
       alert(t('daily_already'));
     } else {
@@ -158,21 +158,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ★ Botón leaderboard en resultados ★ */
   var lbBtn = document.getElementById('btn-pgs-leaderboard');
-  if (lbBtn) { lbBtn.addEventListener('click', function () { _showLeaderboardModal(); }); }
-
-  /* ★ Cerrar modal leaderboard ★ */
-  var closeLb = document.getElementById('btn-close-leaderboard');
-  if (closeLb) closeLb.addEventListener('click', _hideLeaderboardModal);
-  var closeLb2 = document.getElementById('btn-lb-close');
-  if (closeLb2) closeLb2.addEventListener('click', _hideLeaderboardModal);
-  var modalLb = document.getElementById('modal-leaderboard');
-  if (modalLb) modalLb.addEventListener('click', function (e) { if (e.target === this) _hideLeaderboardModal(); });
+  if (lbBtn) { lbBtn.addEventListener('click', function () { LeaderboardUI.open(); }); }
 
   document.addEventListener('keydown', _handleKeyboard);
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       hideSettingsModal();
-      _hideLeaderboardModal();
+      LeaderboardUI.close();
       document.getElementById('modal-quit').style.display = 'none';
     }
   });
@@ -183,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* ══════════════════════════════════════════════════════════════
-   BOTÓN JUGAR — cambia según contexto
+   BOTÓN JUGAR
    ══════════════════════════════════════════════════════════════ */
 
 function _updatePlayButton() {
@@ -208,101 +200,7 @@ function _updatePlayButton() {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   LEADERBOARD MODAL
-   ══════════════════════════════════════════════════════════════ */
-
-function _showLeaderboardModal() {
-  /* Si Firebase no está disponible, fallback a PGS nativo */
-  if (!FirebaseLeaderboard.isReady()) {
-    if (PlayGamesService.isSignedIn()) {
-      PlayGamesService.showLeaderboard('daily_challenge');
-    } else {
-      alert(t('lb_error'));
-    }
-    return;
-  }
-
-  var modal   = document.getElementById('modal-leaderboard'); if (!modal) return;
-  var loading = document.getElementById('lb-loading');
-  var list    = document.getElementById('lb-list');
-  var empty   = document.getElementById('lb-empty');
-  var error   = document.getElementById('lb-error');
-
-  /* i18n del modal */
-  document.getElementById('lb-modal-title').textContent = t('lb_title');
-  document.getElementById('btn-lb-close').textContent   = t('btn_cancel');
-
-  /* Reset estado */
-  loading.style.display = 'flex';
-  list.style.display    = 'none';
-  empty.style.display   = 'none';
-  error.style.display   = 'none';
-  list.innerHTML        = '';
-
-  modal.style.display = 'flex';
-
-  /* Fetch ranking */
-  FirebaseLeaderboard.getDailyRanking(50).then(function (entries) {
-    loading.style.display = 'none';
-
-    if (!entries || !entries.length) {
-      empty.textContent = t('lb_empty');
-      empty.style.display = 'block';
-      return;
-    }
-
-    _renderLeaderboardEntries(list, entries);
-    list.style.display = 'flex';
-
-    /* Scroll a mi posición si existe */
-    var myRow = list.querySelector('.lb-entry--me');
-    if (myRow) myRow.scrollIntoView({ behavior:'smooth', block:'center' });
-  }).catch(function () {
-    loading.style.display = 'none';
-    error.textContent = t('lb_error');
-    error.style.display = 'block';
-  });
-}
-
-function _hideLeaderboardModal() {
-  var modal = document.getElementById('modal-leaderboard');
-  if (modal) modal.style.display = 'none';
-}
-
-var LB_MEDALS = ['🥇','🥈','🥉'];
-
-function _renderLeaderboardEntries(container, entries) {
-  container.innerHTML = '';
-
-  entries.forEach(function (entry, idx) {
-    var div = document.createElement('div');
-    div.className = 'lb-entry' + (entry.isMe ? ' lb-entry--me' : '');
-
-    var medal = idx < 3 ? LB_MEDALS[idx] : (idx + 1) + 'º';
-    var pct   = Math.round((entry.score / 15) * 100);
-    var name  = _escHtmlLb(entry.playerName);
-
-    div.innerHTML =
-      '<span class="lb-pos">' + medal + '</span>' +
-      '<div class="lb-info">' +
-        '<span class="lb-name">' + name + (entry.isMe ? ' <span class="lb-you">(' + t('lb_you') + ')</span>' : '') + '</span>' +
-      '</div>' +
-      '<div class="lb-score-wrap">' +
-        '<span class="lb-score-num">' + entry.score + '</span>' +
-        '<span class="lb-score-total">/15</span>' +
-        '<span class="lb-pct">' + pct + '%</span>' +
-      '</div>';
-
-    container.appendChild(div);
-  });
-}
-
-function _escHtmlLb(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ── Home menu (acordeón) ──────────────────────────────────── */
+/* ── Home menu ───────────────────────────────────────────── */
 function _renderHomeMenu() {
   var container = document.getElementById('mode-list'); if (!container) return;
   container.innerHTML = '';
@@ -490,13 +388,9 @@ function _endGame() {
 
   if (isDaily) markDailyCompleted(state.score);
 
-  /* ★ Firebase: Enviar puntuación al ranking global ★ */
+  /* ★ Firebase + PGS: Enviar puntuación ★ */
   if (isDaily) {
     FirebaseLeaderboard.submitDailyScore(state.score);
-  }
-
-  /* ★ PGS: Enviar puntuación al leaderboard nativo ★ */
-  if (isDaily) {
     PlayGamesService.submitScore('daily_challenge', state.score);
   }
 
@@ -521,7 +415,7 @@ function _endGame() {
     var revBtn = document.getElementById('btn-review');
     if (revBtn) revBtn.style.display = (state.wrongList && state.wrongList.length && !isReview) ? 'flex' : 'none';
 
-    /* ★ Mostrar botón ranking global en resultados (Firebase o PGS) ★ */
+    /* ★ Botón ranking en resultados ★ */
     var lbBtn = document.getElementById('btn-pgs-leaderboard');
     if (lbBtn) {
       var showLb = isDaily && (FirebaseLeaderboard.isReady() || PlayGamesService.isSignedIn());

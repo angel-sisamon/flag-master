@@ -2,48 +2,45 @@
  * js/firebase-leaderboard.js — Ranking global con Firebase Firestore
  *
  * Gestiona el leaderboard del Reto del Día usando Firestore como backend.
- * Cada jugador tiene un documento único por día (evita duplicados).
- * Si Firebase no está disponible (offline, config no puesta), todo es no-op.
+ * Soporta consultar ranking de cualquier fecha (navegación entre días).
  *
- * ORDEN DE CARGA: después de play-games.js, antes de main.js
- * Depende de: storage.js (storageLoad/storageSave), play-games.js (getPlayerInfo)
+ * ORDEN DE CARGA: después de play-games.js, antes de leaderboard-ui.js y main.js
+ * Depende de: storage.js, play-games.js
  */
 
 var FirebaseLeaderboard = (function () {
 
-  /* ── Estado interno ───────────────────────────────── */
   var _db       = null;
   var _isReady  = false;
   var _playerId = null;
-
+  var _lastError = null;
   var COLLECTION = 'daily_scores';
 
-  /* ── Inicialización ────────────────────────────────── */
+  /* ── Cache para no repetir requests ────────────────── */
+  var _cache = {}; /* { 'YYYY-MM-DD': { data: [...], ts: timestamp } } */
+  var CACHE_TTL = 30000; /* 30 segundos */
 
   function init() {
     try {
       if (typeof firebase === 'undefined' || !firebase.firestore) {
-        console.log('[Leaderboard] Firebase no cargado, ranking desactivado');
+        console.log('[Leaderboard] Firebase no disponible');
         return false;
       }
       _db = firebase.firestore();
       _playerId = _getOrCreatePlayerId();
       _isReady = true;
-      console.log('[Leaderboard] Inicializado OK, playerId:', _playerId);
+      console.log('[Leaderboard] ✓ Init OK, player:', _playerId);
       return true;
     } catch (e) {
-      console.warn('[Leaderboard] Error al inicializar:', e);
+      _lastError = e.message || String(e);
+      console.warn('[Leaderboard] ✗ Init error:', e);
       return false;
     }
   }
 
-  /* ── ID único de jugador (persistente en localStorage) ── */
-
   function _getOrCreatePlayerId() {
     var stored = storageLoad('firebase_player_id', null);
     if (stored) return stored;
-
-    /* Generar UUID v4 */
     var id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16 | 0;
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
@@ -52,56 +49,42 @@ var FirebaseLeaderboard = (function () {
     return id;
   }
 
-  /* ── Nombre del jugador (PGS > local > Invitado) ───── */
-
   function _getPlayerName() {
-    /* 1. Nombre de PGS si está conectado */
     if (typeof PlayGamesService !== 'undefined' && PlayGamesService.isSignedIn()) {
       var info = PlayGamesService.getPlayerInfo();
       if (info && info.displayName) return info.displayName;
     }
-    /* 2. Nombre local guardado (del modal de ranking) */
     var local = storageLoad('player_name', null);
     if (local) return local;
-    /* 3. Fallback */
     return typeof t === 'function' ? t('profile_guest') : 'Jugador';
   }
 
-  /* ── Fecha de hoy como string YYYY-MM-DD ───────────── */
-
-  function _getTodayKey() {
-    var d = new Date();
+  function formatDate(d) {
     return d.getFullYear() + '-' +
       String(d.getMonth() + 1).padStart(2, '0') + '-' +
       String(d.getDate()).padStart(2, '0');
+  }
+
+  function getTodayKey() {
+    return formatDate(new Date());
   }
 
   /* ══════════════════════════════════════════════════════
    * ENVIAR PUNTUACIÓN
    * ══════════════════════════════════════════════════════ */
 
-  /**
-   * Envía la puntuación del daily de hoy.
-   * Usa set() con merge → si ya existe, actualiza solo si mejora.
-   * docId = playerId_fecha → garantiza un doc por jugador por día.
-   *
-   * @param {number} score — aciertos (0-15)
-   * @returns {Promise<boolean>}
-   */
   function submitDailyScore(score) {
     if (!_isReady || !_db) return Promise.resolve(false);
 
-    var today = _getTodayKey();
+    var today = getTodayKey();
     var docId = _playerId + '_' + today;
 
-    /* Leer primero para no sobrescribir un score mejor */
     return _db.collection(COLLECTION).doc(docId).get()
       .then(function (doc) {
         if (doc.exists && doc.data().score >= score) {
-          console.log('[Leaderboard] Score existente es mejor o igual, no actualizo');
+          console.log('[Leaderboard] Score existente mejor o igual');
           return true;
         }
-
         return _db.collection(COLLECTION).doc(docId).set({
           date:       today,
           playerId:   _playerId,
@@ -110,37 +93,42 @@ var FirebaseLeaderboard = (function () {
           timestamp:  firebase.firestore.FieldValue.serverTimestamp()
         }).then(function () {
           console.log('[Leaderboard] ✓ Score enviado:', score);
+          /* Invalidar cache de hoy */
+          delete _cache[today];
+          _lastError = null;
           return true;
         });
       })
       .catch(function (err) {
-        console.warn('[Leaderboard] ✗ Error enviando score:', err);
+        _lastError = err.message || String(err);
+        console.error('[Leaderboard] ✗ Error submit:', err.code, err.message);
         return false;
       });
   }
 
   /* ══════════════════════════════════════════════════════
-   * LEER RANKING
+   * LEER RANKING (cualquier fecha)
    * ══════════════════════════════════════════════════════ */
 
   /**
-   * Obtiene el ranking del día actual.
-   * Ordenado por score descendente, luego por timestamp ascendente (desempate: quien lo hizo antes).
-   *
+   * @param {string} dateKey — 'YYYY-MM-DD'
    * @param {number} [limit=50]
-   * @returns {Promise<Array<{playerId, playerName, score, isMe}>>}
+   * @returns {Promise<Array<{playerId, playerName, score, isMe, position}>>}
    */
-  function getDailyRanking(limit) {
-    if (!_isReady || !_db) return Promise.resolve([]);
+  function getRanking(dateKey, limit) {
+    if (!_isReady || !_db) return Promise.reject(new Error('Firebase no inicializado'));
 
     limit = limit || 50;
-    var today = _getTodayKey();
+
+    /* Cache check */
+    var cached = _cache[dateKey];
+    if (cached && (Date.now() - cached.ts < CACHE_TTL)) {
+      console.log('[Leaderboard] Cache hit:', dateKey);
+      return Promise.resolve(cached.data.slice(0, limit));
+    }
 
     return _db.collection(COLLECTION)
-      .where('date', '==', today)
-      .orderBy('score', 'desc')
-      .orderBy('timestamp', 'asc')
-      .limit(limit)
+      .where('date', '==', dateKey)
       .get()
       .then(function (snapshot) {
         var results = [];
@@ -153,26 +141,52 @@ var FirebaseLeaderboard = (function () {
             isMe:       data.playerId === _playerId
           });
         });
-        console.log('[Leaderboard] Ranking cargado:', results.length, 'entradas');
-        return results;
+
+        results.sort(function (a, b) {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.playerName.localeCompare(b.playerName);
+        });
+
+        /* Añadir posición */
+        results.forEach(function (r, i) { r.position = i + 1; });
+
+        /* Guardar en cache */
+        _cache[dateKey] = { data: results, ts: Date.now() };
+
+        return results.slice(0, limit);
       })
       .catch(function (err) {
-        console.warn('[Leaderboard] Error leyendo ranking:', err);
-        /* Si el error es por índice faltante, logeamos la URL */
-        if (err.message && err.message.indexOf('index') !== -1) {
-          console.error('[Leaderboard] Necesitas crear un índice compuesto en Firestore. Mira la consola del navegador para el enlace.');
-        }
-        return [];
+        _lastError = err.message || String(err);
+        console.error('[Leaderboard] ✗ Error read:', err.code, err.message);
+        throw err;
       });
   }
 
-  /* ── API pública ───────────────────────────────────── */
+  /**
+   * Busca la posición del jugador actual en un día concreto.
+   * @returns {Promise<{position, score, total}|null>}
+   */
+  function getMyPosition(dateKey) {
+    return getRanking(dateKey, 200).then(function (entries) {
+      var total = entries.length;
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isMe) {
+          return { position: entries[i].position, score: entries[i].score, total: total };
+        }
+      }
+      return null;
+    });
+  }
 
   return {
     init:              init,
     submitDailyScore:  submitDailyScore,
-    getDailyRanking:   getDailyRanking,
+    getRanking:        getRanking,
+    getMyPosition:     getMyPosition,
+    getTodayKey:       getTodayKey,
+    formatDate:        formatDate,
     isReady:           function () { return _isReady; },
-    getPlayerId:       function () { return _playerId; }
+    getPlayerId:       function () { return _playerId; },
+    getLastError:      function () { return _lastError; }
   };
 })();
