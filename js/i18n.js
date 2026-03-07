@@ -91,6 +91,13 @@ var I18N_STRINGS = {
     profile_connected_toast:'Conectado como {name}',
     leaderboard_daily: 'Ranking Global',
     pgs_achievements: 'Logros Google Play',
+    leaderboard_daily: 'Ranking Global',
+    pgs_achievements: 'Logros Google Play',
+    lb_title: '🏆 Ranking del Día',
+    lb_loading: 'Cargando ranking...',
+    lb_empty: 'Nadie ha jugado aún hoy. ¡Sé el primero!',
+    lb_error: 'No se pudo cargar el ranking.',
+    lb_you: 'Tú',
   },
 
   en: {
@@ -175,6 +182,13 @@ var I18N_STRINGS = {
     profile_connected_toast:'Connected as {name}',
     leaderboard_daily: 'Global Ranking',
     pgs_achievements: 'Google Play Achievements',
+    leaderboard_daily: 'Global Ranking',
+    pgs_achievements: 'Google Play Achievements',
+    lb_title: '🏆 Today\'s Ranking',
+    lb_loading: 'Loading ranking...',
+    lb_empty: 'No one has played today yet. Be the first!',
+    lb_error: 'Could not load ranking.',
+    lb_you: 'You',
   }
 };
 

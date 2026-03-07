@@ -28,16 +28,12 @@
         <span class="home-brand-name">FlagMaster</span>
       </div>
       <div class="home-topbar-actions">
-        <!-- ★ Profile Pill ★ -->
         <button class="home-profile-pill profile-pill--guest" id="btn-profile">
-          <img class="profile-avatar" id="profile-avatar"
-               src="" alt="" style="display:none" />
+          <img class="profile-avatar" id="profile-avatar" src="" alt="" style="display:none" />
           <span class="profile-icon" id="profile-icon">👤</span>
           <span class="profile-name" id="profile-name">Invitado</span>
           <span class="profile-status-dot dot-offline" id="profile-status-dot"></span>
         </button>
-        <!-- Fin Profile Pill -->
-        <!-- Stats pill -->
         <div class="home-record-pill">
           <span>🏆</span>
           <span class="record-label" data-i18n="home_record">Récord</span>
@@ -53,7 +49,7 @@
       </div>
     </div>
 
-    <!-- MODE LIST (scrollable) -->
+    <!-- MODE LIST -->
     <div class="mode-list-wrap">
       <div id="mode-list" class="mode-list"></div>
     </div>
@@ -65,22 +61,22 @@
     <div class="continent-wrap">
       <label class="continent-label" data-i18n="settings_continent">Continente</label>
       <select id="continent-select" class="continent-select">
-        <option value="all"  data-i18n="continent_all">Todos</option>
-        <option value="eu"   data-i18n="continent_eu">Europa</option>
-        <option value="am"   data-i18n="continent_am">América</option>
-        <option value="as"   data-i18n="continent_as">Asia</option>
-        <option value="af"   data-i18n="continent_af">África</option>
-        <option value="oc"   data-i18n="continent_oc">Oceanía</option>
+        <option value="all" data-i18n="continent_all">Todos</option>
+        <option value="eu"  data-i18n="continent_eu">Europa</option>
+        <option value="am"  data-i18n="continent_am">América</option>
+        <option value="as"  data-i18n="continent_as">Asia</option>
+        <option value="af"  data-i18n="continent_af">África</option>
+        <option value="oc"  data-i18n="continent_oc">Oceanía</option>
       </select>
     </div>
 
-    <!-- BOTTOM ACTION BAR (fijo) -->
+    <!-- BOTTOM ACTION BAR -->
     <div class="home-action-bar">
-      <button class="home-action-icon-btn" id="btn-settings-home"     aria-label="Ajustes"      title="Ajustes">⚙️</button>
-      <button class="home-action-icon-btn" id="btn-ranking-home"       aria-label="Ranking"      title="Ranking">🏆</button>
+      <button class="home-action-icon-btn" id="btn-settings-home"    aria-label="Ajustes">⚙️</button>
+      <button class="home-action-icon-btn" id="btn-ranking-home"      aria-label="Ranking">🏆</button>
       <button class="btn-play-main"        id="btn-play">JUGAR</button>
-      <button class="home-action-icon-btn" id="btn-achievements-home"  aria-label="Logros"       title="Logros">🏅</button>
-      <button class="home-action-icon-btn" id="btn-stats-home"         aria-label="Estadísticas" title="Estadísticas">📊</button>
+      <button class="home-action-icon-btn" id="btn-achievements-home" aria-label="Logros">🏅</button>
+      <button class="home-action-icon-btn" id="btn-stats-home"        aria-label="Estadísticas">📊</button>
     </div>
 
   </div>
@@ -90,30 +86,20 @@
 <div id="screen-game" class="screen">
   <div class="game-bg"><div class="orb orb-1 small"></div><div class="orb orb-2 small"></div></div>
   <div class="game-layout">
-
     <header class="game-hud">
       <button class="btn-icon-only" id="btn-quit" aria-label="Abandonar partida">✕</button>
       <div class="hud-stats">
-        <div class="hud-stat">
-          <span class="hud-stat-icon">⭐</span>
-          <span class="hud-stat-value" id="hud-score">0</span>
-        </div>
-        <div class="hud-stat streak-stat">
-          <span class="hud-stat-icon">🔥</span>
-          <span class="hud-stat-value" id="hud-streak">0</span>
-        </div>
+        <div class="hud-stat"><span class="hud-stat-icon">⭐</span><span class="hud-stat-value" id="hud-score">0</span></div>
+        <div class="hud-stat streak-stat"><span class="hud-stat-icon">🔥</span><span class="hud-stat-value" id="hud-streak">0</span></div>
       </div>
       <div class="hud-right">
         <span id="hud-progress-text" class="hud-progress-text">1/10</span>
         <div class="hud-global-timer" id="hud-global-timer" style="display:none">
-          <span>⏱️</span>
-          <span class="hud-global-timer-val" id="hud-global-timer-val">60</span>
+          <span>⏱️</span><span class="hud-global-timer-val" id="hud-global-timer-val">60</span>
         </div>
       </div>
     </header>
-
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-bar"></div></div>
-
     <div class="timer-container" id="timer-container" style="display:none">
       <div class="timer-ring">
         <svg viewBox="0 0 44 44" class="timer-svg">
@@ -123,36 +109,25 @@
         <span class="timer-text" id="timer-text">15</span>
       </div>
     </div>
-
     <main class="question-zone">
-      <!-- Flip card -->
       <div class="card-3d-wrap" id="question-card">
         <div class="card-flipper" id="card-flipper">
           <div class="card-face card-front">
-            <div class="flag-display" id="flag-display" style="display:none">
-              <div id="flag-img-wrap"></div>
-            </div>
+            <div class="flag-display" id="flag-display" style="display:none"><div id="flag-img-wrap"></div></div>
             <div class="country-display" id="country-display" style="display:none">
               <p class="country-prompt" id="country-prompt-label">¿De qué país es esta bandera?</p>
               <h2 class="country-name" id="country-name-label"></h2>
             </div>
           </div>
-          <div class="card-face card-back">
-            <div id="reveal-content" class="reveal-content"></div>
-          </div>
+          <div class="card-face card-back"><div id="reveal-content" class="reveal-content"></div></div>
         </div>
       </div>
-
       <div class="options-grid" id="options-grid"></div>
-
       <div class="feedback-bar" id="feedback-bar" style="display:none" role="status" aria-live="polite" aria-atomic="true">
-        <span class="feedback-icon" id="feedback-icon"></span>
-        <span class="feedback-text"  id="feedback-text"></span>
+        <span class="feedback-icon" id="feedback-icon"></span><span class="feedback-text" id="feedback-text"></span>
       </div>
-
       <button class="btn btn-primary btn-next" id="btn-next" style="display:none">Siguiente →</button>
     </main>
-
   </div>
 </div>
 
@@ -161,51 +136,32 @@
   <div class="results-bg"><div class="orb orb-1"></div><div class="orb orb-3"></div></div>
   <div class="results-content">
     <div class="results-trophy" id="results-trophy">🏆</div>
-    <h2 class="results-title"   id="results-title">¡Partida completada!</h2>
-    <p  class="results-subtitle" id="results-subtitle">Resultados</p>
-
+    <h2 class="results-title" id="results-title">¡Partida completada!</h2>
+    <p class="results-subtitle" id="results-subtitle">Resultados</p>
     <div class="results-player-badge" id="results-player-name" style="display:none"></div>
-
     <div class="results-score-big card">
-      <span class="results-score-num"   id="results-score-num">0</span>
+      <span class="results-score-num" id="results-score-num">0</span>
       <span class="results-score-denom" id="results-score-denom">/10</span>
     </div>
-
     <div class="results-stats card">
-      <div class="result-stat">
-        <span class="result-stat-icon">✅</span>
-        <span class="result-stat-value" id="res-correct">0</span>
-        <span class="result-stat-label" id="res-correct-label">Aciertos</span>
-      </div>
+      <div class="result-stat"><span class="result-stat-icon">✅</span><span class="result-stat-value" id="res-correct">0</span><span class="result-stat-label" id="res-correct-label">Aciertos</span></div>
       <div class="result-stat-divider"></div>
-      <div class="result-stat">
-        <span class="result-stat-icon">❌</span>
-        <span class="result-stat-value" id="res-wrong">0</span>
-        <span class="result-stat-label" id="res-wrong-label">Errores</span>
-      </div>
+      <div class="result-stat"><span class="result-stat-icon">❌</span><span class="result-stat-value" id="res-wrong">0</span><span class="result-stat-label" id="res-wrong-label">Errores</span></div>
       <div class="result-stat-divider"></div>
-      <div class="result-stat">
-        <span class="result-stat-icon">🔥</span>
-        <span class="result-stat-value" id="res-streak">0</span>
-        <span class="result-stat-label" id="res-streak-label">Racha</span>
-      </div>
+      <div class="result-stat"><span class="result-stat-icon">🔥</span><span class="result-stat-value" id="res-streak">0</span><span class="result-stat-label" id="res-streak-label">Racha</span></div>
     </div>
-
-    <div class="results-new-record" id="results-new-record"  style="display:none">🎉 ¡Nuevo récord!</div>
+    <div class="results-new-record" id="results-new-record" style="display:none">🎉 ¡Nuevo récord!</div>
     <div class="results-daily-badge" id="results-daily-badge" style="display:none">📅 ¡Reto del día!</div>
-
     <div class="results-achievements" id="results-achievements" style="display:none">
       <p class="results-achievements-title">🏅 Logros desbloqueados</p>
       <div id="results-achievements-list" class="results-achievements-list"></div>
     </div>
-
     <div class="results-actions">
-      <button class="btn btn-share"           id="btn-share"   aria-label="Compartir resultado">🔗 Compartir</button>
-      <!-- ★ PGS: Botón ranking global (solo visible tras daily + PGS conectado) ★ -->
-      <button class="btn btn--outline"        id="btn-pgs-leaderboard" style="display:none">🏆 <span data-i18n="leaderboard_daily">Ranking Global</span></button>
-      <button class="btn btn-primary btn-xl"  id="btn-retry"   aria-label="Reintentar partida">🔄 Reintentar</button>
-      <button class="btn btn-review"          id="btn-review"  aria-label="Repasar errores" style="display:none">📖 Repasar errores</button>
-      <button class="btn btn-ghost"           id="btn-home"    aria-label="Volver al inicio">🏠 Inicio</button>
+      <button class="btn btn-share"          id="btn-share">🔗 Compartir</button>
+      <button class="btn btn--outline"       id="btn-pgs-leaderboard" style="display:none">🏆 <span data-i18n="leaderboard_daily">Ranking Global</span></button>
+      <button class="btn btn-primary btn-xl" id="btn-retry">🔄 Reintentar</button>
+      <button class="btn btn-review"         id="btn-review" style="display:none">📖 Repasar errores</button>
+      <button class="btn btn-ghost"          id="btn-home">🏠 Inicio</button>
     </div>
   </div>
 </div>
@@ -215,7 +171,7 @@
   <div class="home-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="subscreen-content">
     <div class="subscreen-header">
-      <button class="btn-icon-only" id="btn-back-ranking" aria-label="Volver al inicio">←</button>
+      <button class="btn-icon-only" id="btn-back-ranking">←</button>
       <h2 class="subscreen-title" data-i18n="ranking_title">🏆 Ranking Local</h2>
       <div style="width:40px"></div>
     </div>
@@ -234,13 +190,12 @@
   <div class="home-bg"><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
   <div class="subscreen-content">
     <div class="subscreen-header">
-      <button class="btn-icon-only" id="btn-back-achievements" aria-label="Volver al inicio">←</button>
+      <button class="btn-icon-only" id="btn-back-achievements">←</button>
       <h2 class="subscreen-title" data-i18n="ach_title">🏅 Logros</h2>
       <div style="width:40px"></div>
     </div>
     <p class="achievements-progress-text" id="achievements-progress-text">0 / 14 desbloqueados</p>
     <div class="achievement-grid" id="achievement-grid"></div>
-    <!-- ★ PGS: Botón para ver logros nativos de Google Play Games ★ -->
     <button class="btn btn--outline" id="btn-pgs-achievements" style="display:none">🎮 <span data-i18n="pgs_achievements">Logros Google Play</span></button>
   </div>
 </div>
@@ -250,11 +205,30 @@
   <div class="home-bg"><div class="orb orb-1"></div><div class="orb orb-3"></div></div>
   <div class="subscreen-content">
     <div class="subscreen-header">
-      <button class="btn-icon-only" id="btn-back-stats" aria-label="Volver al inicio">←</button>
+      <button class="btn-icon-only" id="btn-back-stats">←</button>
       <h2 class="subscreen-title" data-i18n="stats_title">📊 Estadísticas</h2>
       <div style="width:40px"></div>
     </div>
     <div id="stats-body" class="stats-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MODAL: LEADERBOARD GLOBAL ═════════════════════ -->
+<div id="modal-leaderboard" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal-panel card modal-panel-lb">
+    <div class="modal-header">
+      <h3 class="modal-title" id="lb-modal-title">🏆 Ranking del Día</h3>
+      <button class="btn-icon-only" id="btn-close-leaderboard">✕</button>
+    </div>
+    <div class="modal-body" id="lb-modal-body" style="padding:.6rem 0">
+      <div class="lb-loading" id="lb-loading"><span class="lb-spinner"></span><span data-i18n="lb_loading">Cargando ranking...</span></div>
+      <div class="lb-list" id="lb-list" style="display:none"></div>
+      <p class="lb-empty" id="lb-empty" style="display:none" data-i18n="lb_empty">Nadie ha jugado aún hoy. ¡Sé el primero!</p>
+      <p class="lb-error" id="lb-error" style="display:none" data-i18n="lb_error">No se pudo cargar el ranking.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-lb-close">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -328,9 +302,9 @@
 <div id="modal-quit" class="modal-overlay" style="display:none">
   <div class="modal-panel card modal-panel-sm">
     <h3 class="modal-title" id="quit-modal-title" style="text-align:center;margin:1.25rem 1.5rem .5rem">¿Abandonar partida?</h3>
-    <p  class="modal-desc"  id="quit-modal-body">Se perderá el progreso actual.</p>
+    <p class="modal-desc" id="quit-modal-body">Se perderá el progreso actual.</p>
     <div class="modal-footer modal-footer-row">
-      <button class="btn btn-ghost"  id="btn-quit-cancel">Cancelar</button>
+      <button class="btn btn-ghost" id="btn-quit-cancel">Cancelar</button>
       <button class="btn btn-danger" id="btn-quit-confirm">Salir</button>
     </div>
   </div>
@@ -347,58 +321,65 @@
 
 <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
 
-<!-- ═══════════════════════════════ MODAL: NOMBRE RANKING ═══════════════════════════ -->
+<!-- MODAL: NOMBRE RANKING -->
 <div id="modal-name" class="modal-overlay" style="display:none" role="dialog" aria-modal="true">
   <div class="modal-panel card modal-panel-sm">
     <h3 class="modal-title" id="name-modal-title" style="text-align:center;margin:1.25rem 1.5rem .5rem">🏆 ¡Top 5!</h3>
-    <p  class="modal-desc"  id="name-modal-body">Introduce tu nombre para el ranking:</p>
+    <p class="modal-desc" id="name-modal-body">Introduce tu nombre para el ranking:</p>
     <div style="padding:0 1.5rem .5rem">
       <input type="text" id="name-input" class="name-input" maxlength="20" placeholder="Tu nombre..." autocomplete="nickname" spellcheck="false"/>
     </div>
     <div class="modal-footer modal-footer-row">
-      <button class="btn btn-ghost"    id="btn-name-skip"  data-i18n="ranking_name_skip">Omitir</button>
-      <button class="btn btn-primary"  id="btn-name-save"  data-i18n="ranking_name_save">Guardar</button>
+      <button class="btn btn-ghost"   id="btn-name-skip" data-i18n="ranking_name_skip">Omitir</button>
+      <button class="btn btn-primary" id="btn-name-save" data-i18n="ranking_name_save">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- ── Onboarding primer uso ─────────────────────────────── -->
-<div id="onboarding-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Bienvenido a FlagMaster">
+<!-- Onboarding -->
+<div id="onboarding-overlay" style="display:none" role="dialog" aria-modal="true">
   <div class="onboarding-box">
     <div class="onboarding-slides">
-
       <div class="onboarding-slide active" id="ob-slide-1">
         <div class="ob-emoji">🌍</div>
         <h2 class="ob-title" data-i18n="ob_title_1">¡Bienvenido a FlagMaster!</h2>
         <p class="ob-desc" data-i18n="ob_desc_1">Pon a prueba tu conocimiento de banderas y países del mundo.</p>
-        <div class="ob-modes">
-          <div class="ob-mode-pill">🌍 País</div>
-          <div class="ob-mode-pill">🚩 Banderas</div>
-          <div class="ob-mode-pill">⚡ Contrarreloj</div>
-        </div>
+        <div class="ob-modes"><div class="ob-mode-pill">🌍 País</div><div class="ob-mode-pill">🚩 Banderas</div><div class="ob-mode-pill">⚡ Contrarreloj</div></div>
       </div>
-
       <div class="onboarding-slide" id="ob-slide-2">
         <div class="ob-emoji">📅</div>
         <h2 class="ob-title" data-i18n="ob_title_2">Reto del Día</h2>
         <p class="ob-desc" data-i18n="ob_desc_2">Cada día, 15 países iguales para todos. ¡Solo una oportunidad!</p>
       </div>
-
     </div>
-
-    <div class="ob-dots">
-      <span class="ob-dot active" data-slide="0"></span>
-      <span class="ob-dot"        data-slide="1"></span>
-    </div>
-
+    <div class="ob-dots"><span class="ob-dot active" data-slide="0"></span><span class="ob-dot" data-slide="1"></span></div>
     <div class="ob-actions">
       <button class="btn btn-ghost ob-btn-skip"  id="ob-skip"  data-i18n="ob_skip">Omitir</button>
-      <button class="btn btn-primary ob-btn-next" id="ob-next"  data-i18n="ob_next">Siguiente →</button>
+      <button class="btn btn-primary ob-btn-next" id="ob-next" data-i18n="ob_next">Siguiente →</button>
     </div>
   </div>
 </div>
 
-<!-- Scripts en orden — sin ES Modules → 100% compatible con file:// y Capacitor WebView -->
+<!-- ═══════════════════════════════ SCRIPTS ═══════════════════════════════════════ -->
+
+<!-- Firebase SDK compat (carga desde CDN, no-op si offline) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  /* ⚠️ REEMPLAZA con tu config real de Firebase Console */
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp({
+      apiKey: "AIzaSyC7AWLRBIzYfy681OleacIBf117BSRi208",
+      authDomain: "flagmaster-14d61.firebaseapp.com",
+      projectId: "flagmaster-14d61",
+      storageBucket: "flagmaster-14d61.firebasestorage.app",
+      messagingSenderId: "101776765614",
+      appId: "1:101776765614:web:db52567dde733b3b2a333f"
+    });
+  }
+</script>
+
+<!-- App scripts — orden estricto -->
 <script src="js/i18n.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/utils.js"></script>
@@ -408,6 +389,7 @@
 <script src="js/achievements.js"></script>
 <script src="js/play-games.js"></script>
 <script src="js/profile-pill.js"></script>
+<script src="js/firebase-leaderboard.js"></script>
 <script src="js/ranking.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
