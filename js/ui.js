@@ -1,9 +1,5 @@
 /**
  * js/ui.js — Renderizado DOM. Emojis 100% offline. i18n integrado.
- *
- * CAMBIOS v4.1:
- *  - showAnswerFeedback ya NO muestra el btn-next (auto-avance en main.js)
- *  - country-display forzado a flex-direction:column para alineación vertical
  */
 var OPTION_BADGES=['A','B','C','D'];
 var _CIRC=2*Math.PI*18;
@@ -71,13 +67,8 @@ function renderQuestion(question, mode, animate, onAnswer) {
     if(cntryDisp) cntryDisp.style.display='none';
     if(flagWrap) flagWrap.innerHTML='<span class="flag-emoji-lg">'+question.correct.flag+'</span>';
   } else {
-    /* ★ Modo guess-flag: alineación vertical (pregunta arriba, país debajo) ★ */
     if(flagDisp) flagDisp.style.display='none';
-    if(cntryDisp) {
-      cntryDisp.style.display='flex';
-      cntryDisp.style.flexDirection='column';
-      cntryDisp.style.alignItems='center';
-    }
+    if(cntryDisp) cntryDisp.style.display='flex';
     if(cntryLbl) cntryLbl.textContent=cn(question.correct);
     var prompt=document.getElementById('country-prompt-label');
     if(prompt) prompt.textContent=t('game_flag_prompt');
@@ -130,10 +121,8 @@ function showAnswerFeedback(isCorrect, selectedIndex, correctIndex, correctCount
     var flipper=document.getElementById('card-flipper');
     if (flipper) flipper.classList.add('flipped');
   },320);
-
-  /* ★ CAMBIO v4.1: Ya NO mostramos btn-next. El auto-avance en main.js se encarga. ★ */
-  /* var next=document.getElementById('btn-next');
-     if (next) { next.textContent=t('game_next'); next.style.display='flex'; } */
+  var next=document.getElementById('btn-next');
+  if (next) { next.textContent=t('game_next'); next.style.display='flex'; }
 }
 
 /* ── Timer ────────────────────────────────────────── */
@@ -231,27 +220,95 @@ function shareResult(score, total, isTA, isDaily) {
 
   /* 2. Fallback — copiar al portapapeles + toast (por si el plugin no está instalado) */
   var toastMsg = lang==='en' ? 'Result copied!' : '¡Resultado copiado!';
+  var fullText = title + '\n' + text;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(title + '\n' + text).then(function () {
-      var toastEl = document.getElementById('achievement-toast');
-      var icon    = document.getElementById('achievement-toast-icon');
-      var name    = document.getElementById('achievement-toast-name');
-      var label   = document.getElementById('achievement-toast-label');
-      if (toastEl) {
-        if (icon)  icon.textContent  = '📋';
-        if (name)  name.textContent  = toastMsg;
-        if (label) label.textContent = '';
-        toastEl.style.display = 'flex';
-        toastEl.classList.remove('toast-hide');
-        toastEl.classList.add('toast-show');
-        setTimeout(function () {
-          toastEl.classList.add('toast-hide');
-          setTimeout(function () {
-            toastEl.style.display = 'none';
-            toastEl.classList.remove('toast-show', 'toast-hide');
-          }, 400);
-        }, 2000);
-      }
-    }).catch(function(){});
+    navigator.clipboard.writeText(fullText).then(function() { _showCopyToast(toastMsg); }).catch(function(){});
+  } else {
+    /* último fallback: execCommand para WebViews antiguos */
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = fullText; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      _showCopyToast(toastMsg);
+    } catch(e) {}
+  }
+}
+
+function _showCopyToast(msg) {
+  var toastEl = document.getElementById('achievement-toast');
+  var icon    = document.getElementById('achievement-toast-icon');
+  var name    = document.getElementById('achievement-toast-name');
+  var label   = document.getElementById('achievement-toast-label');
+  if (!toastEl) return;
+  if (icon)  icon.textContent  = '📋';
+  if (name)  name.textContent  = msg;
+  if (label) label.textContent = '';
+  toastEl.style.display = 'flex';
+  toastEl.classList.remove('toast-hide'); toastEl.classList.add('toast-show');
+  setTimeout(function(){
+    toastEl.classList.add('toast-hide');
+    setTimeout(function(){ toastEl.style.display='none'; toastEl.classList.remove('toast-show','toast-hide'); }, 400);
+  }, 2000);
+}
+
+/* ── Modal salir ──────────────────────────────────── */
+
+/*
+ * Guardamos la referencia al callback de cancelar activo.
+ * Esto permite cerrar el modal desde fuera (tecla Escape / botón Back de Android
+ * en Capacitor) garantizando que los timers del juego se reanudan correctamente.
+ */
+var _quitModalCancel = null;
+
+/**
+ * Muestra el modal de confirmación para abandonar la partida.
+ * Limpia automáticamente cualquier listener de una apertura anterior
+ * para evitar acumulación de callbacks (bug en back button + reabrir).
+ */
+function showQuitModal(onConfirm, onCancel) {
+  /* Si hay una sesión anterior sin cerrar (p.ej. back button de Android),
+     la cancelamos limpiamente antes de abrir una nueva. */
+  if (_quitModalCancel) { _quitModalCancel(); }
+
+  var modal = document.getElementById('modal-quit');
+  var ok    = document.getElementById('btn-quit-confirm');
+  var no    = document.getElementById('btn-quit-cancel');
+  document.getElementById('quit-modal-title').textContent = t('quit_title');
+  document.getElementById('quit-modal-body').textContent  = t('quit_body');
+  ok.textContent = t('btn_quit');
+  no.textContent = t('btn_cancel');
+
+  function cleanup() {
+    modal.style.display = 'none';
+    ok.removeEventListener('click', hOk);
+    no.removeEventListener('click', hNo);
+    modal.removeEventListener('click', hOverlay);
+    _quitModalCancel = null;
+  }
+  function hOk()       { cleanup(); if (onConfirm) onConfirm(); }
+  function hNo()       { cleanup(); if (onCancel)  onCancel();  }
+  /* Cerrar también al tocar fuera del panel (consistente con otros modales) */
+  function hOverlay(e) { if (e.target === modal) hNo(); }
+
+  _quitModalCancel = hNo;
+  ok.addEventListener('click', hOk);
+  no.addEventListener('click', hNo);
+  modal.addEventListener('click', hOverlay);
+  modal.style.display = 'flex';
+}
+
+/**
+ * Cierra el modal de salida desde fuera (tecla Escape, botón Back de Android).
+ * Invoca el callback de cancelar, lo que reanuda los timers del juego.
+ */
+function closeQuitModal() {
+  if (_quitModalCancel) {
+    _quitModalCancel(); /* → cleanup() + onCancel() → _resumeTimers() */
+  } else {
+    /* Fallback por si el modal estaba visible pero sin callback activo */
+    var modal = document.getElementById('modal-quit');
+    if (modal) modal.style.display = 'none';
   }
 }
