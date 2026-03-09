@@ -11,7 +11,6 @@ function applyDarkMode(dark) {
   document.body.classList.toggle('light',!dark);
 }
 
-/** Devuelve el tema del sistema: true = oscuro */
 function getSystemDarkMode() {
   return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
@@ -25,9 +24,7 @@ function syncSettingsUI(s) {
   if(tv)tv.checked=!!s.vibration;    if(td)td.checked=!!s.darkMode;
   var g=document.getElementById('group-timer-duration');
   if(g)g.style.display=s.timerEnabled?'flex':'none';
-  /* lang chips */
   setChipActive('chips-lang', getLang ? getLang() : 'es');
-  /* ★ Sincronizar selector de continente ★ */
   var contSel = document.getElementById('continent-select');
   if (contSel) {
     var saved = (typeof storageLoad === 'function') ? storageLoad('last_continent', 'all') : 'all';
@@ -49,6 +46,8 @@ function readSettingsUI() {
 function showSettingsModal(s) { syncSettingsUI(s); document.getElementById('modal-settings').style.display='flex'; }
 function hideSettingsModal()   { document.getElementById('modal-settings').style.display='none'; }
 
+function supportsVibration() { return !!(navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate); }
+
 function initSettingsEvents(onSaved) {
   if(!supportsVibration()){ var gv=document.getElementById('group-vibration'); if(gv)gv.style.display='none'; }
 
@@ -61,7 +60,6 @@ function initSettingsEvents(onSaved) {
     });
   });
 
-  /* lang chips dentro de ajustes */
   var langGroup = document.getElementById('chips-lang');
   if (langGroup) {
     langGroup.querySelectorAll('.chip').forEach(function(c){
@@ -80,10 +78,8 @@ function initSettingsEvents(onSaved) {
 
   document.getElementById('btn-save-settings').addEventListener('click',function(){
     var s=readSettingsUI(); saveSettings(s); hideSettingsModal();
-    /* aplicar idioma si cambió */
     var langChip = document.querySelector('#chips-lang .chip.active');
     if (langChip && typeof setLang === 'function') setLang(langChip.dataset.lang);
-    /* ★ Guardar continente seleccionado ★ */
     var contSel = document.getElementById('continent-select');
     if (contSel && typeof storageSave === 'function') {
       storageSave('last_continent', contSel.value);

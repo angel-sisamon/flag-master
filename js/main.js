@@ -1,7 +1,11 @@
 /**
- * js/main.js — FlagMaster v4
+ * js/main.js — FlagMaster v5
  *
  * Nombres internos de modo: 'guess-country' | 'guess-flag' | 'timetrial' | 'daily' | 'review'
+ *
+ * CAMBIOS v5:
+ *  - Integración con NotificationService (3 puntos)
+ *  - Icono de calendario SVG dinámico para el modo daily
  */
 
 var MODE_GROUPS = [
@@ -67,6 +71,13 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ★ Firebase Leaderboard ★ */
   FirebaseLeaderboard.init();
 
+  /* ★ Notificaciones locales ★
+     init() pide permiso si no lo tiene.
+     syncOnAppOpen() cancela+reprograma según el estado actual del reto. */
+  NotificationService.init().then(function () {
+    NotificationService.syncOnAppOpen();
+  });
+
   /* ★ PGS ★ */
   ProfilePill.init();
   PlayGamesService.init().then(function (signedIn) {
@@ -88,6 +99,9 @@ document.addEventListener('DOMContentLoaded', function () {
     _refreshBestScore();
     updateDailyCardUI();
     _updateDailyStreakUI();
+    /* ★ Re-sincronizar notificación al guardar ajustes
+       (por si el usuario cambió la hora o el idioma) ★ */
+    NotificationService.syncOnAppOpen();
   });
 
   _renderHomeMenu();
@@ -204,7 +218,7 @@ function _renderHomeMenu() {
   _updatePlayButton();
 }
 
-/* ★ MODIFICADO: icono dinámico SVG de calendario para el modo daily ★ */
+/* Icono SVG dinámico de calendario para el modo daily */
 function _buildSoloCard(mode) {
   var card = document.createElement('button');
   card.className = 'mode-card mode-card--solo' +
@@ -213,7 +227,6 @@ function _buildSoloCard(mode) {
   card.dataset.mode = mode.id;
   var keys = MODE_I18N[mode.id] || { name: mode.id, desc: '' };
 
-  /* Para el modo daily usamos el icono SVG dinámico; el resto usa visualBig (emoji) */
   var iconContent = (mode.id === 'daily' && typeof getDailyCalendarIcon === 'function')
     ? getDailyCalendarIcon(30)
     : mode.visualBig;
@@ -284,12 +297,11 @@ function _selectMode(id) {
   vibrateDevice([18], _settings.vibration);
 }
 
-/* ★ MODIFICADO: hero visual con SVG de calendario para el modo daily ★ */
+/* Hero visual con SVG de calendario para el modo daily */
 function _updateHeroVisual(id) {
   var heroEl = document.getElementById('hero-visual'); if (!heroEl) return;
   heroEl.classList.remove('hero-anim'); void heroEl.offsetWidth; heroEl.classList.add('hero-anim');
 
-  /* Para el modo daily mostramos el calendario SVG a mayor tamaño en el hero */
   if (id === 'daily' && typeof getDailyCalendarIcon === 'function') {
     heroEl.innerHTML = getDailyCalendarIcon(58);
   } else {
@@ -392,7 +404,11 @@ function _endGame() {
   var isNewRecord = !isReview && saveBestScore(mode, state.score);
   if (!isReview) { addRankingEntry({ mode: mode, score: state.score, total: total, maxStreak: state.maxStreak, ts: Date.now() }); }
 
-  if (isDaily) markDailyCompleted(state.score);
+  if (isDaily) {
+    markDailyCompleted(state.score);
+    /* ★ Cancelar la notif de hoy y programar la de mañana ★ */
+    NotificationService.onDailyCompleted();
+  }
 
   /* ★ Firebase + PGS: Enviar puntuación ★ */
   if (isDaily) {
@@ -474,7 +490,6 @@ function _handleKeyboard(e) {
   if (e.key === 'Escape') {
     hideSettingsModal();
     LeaderboardUI.close();
-    /* closeQuitModal llama al onCancel activo → _resumeTimers() si procede */
     closeQuitModal();
     return;
   }
