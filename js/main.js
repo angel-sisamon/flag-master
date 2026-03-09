@@ -204,6 +204,7 @@ function _renderHomeMenu() {
   _updatePlayButton();
 }
 
+/* ★ MODIFICADO: icono dinámico SVG de calendario para el modo daily ★ */
 function _buildSoloCard(mode) {
   var card = document.createElement('button');
   card.className = 'mode-card mode-card--solo' +
@@ -211,8 +212,14 @@ function _buildSoloCard(mode) {
     (!mode.active ? ' mode-card--locked' : '');
   card.dataset.mode = mode.id;
   var keys = MODE_I18N[mode.id] || { name: mode.id, desc: '' };
+
+  /* Para el modo daily usamos el icono SVG dinámico; el resto usa visualBig (emoji) */
+  var iconContent = (mode.id === 'daily' && typeof getDailyCalendarIcon === 'function')
+    ? getDailyCalendarIcon(30)
+    : mode.visualBig;
+
   card.innerHTML =
-    '<span class="mode-card-icon" id="daily-icon">' + mode.visualBig + '</span>' +
+    '<span class="mode-card-icon" id="daily-icon">' + iconContent + '</span>' +
     '<div class="mode-card-text">' +
       '<span class="mode-card-name">' + t(keys.name) + '</span>' +
       '<span class="mode-card-desc" id="daily-status">' + t(keys.desc) + '</span>' +
@@ -233,7 +240,6 @@ function _buildGroupBlock(group) {
     '<span class="mode-group-arrow">' + (isOpen ? '▾' : '▸') + '</span>';
   var children = document.createElement('div');
   children.className = 'mode-group-children' + (isOpen ? ' mode-group-children--open' : '');
-
   group.modes.forEach(function (mode) {
     var card = document.createElement('button');
     card.className = 'mode-card mode-card--child' +
@@ -247,7 +253,6 @@ function _buildGroupBlock(group) {
         '<span class="mode-card-name">' + t(keys.name) + '</span>' +
         '<span class="mode-card-desc">' + t(keys.desc) + '</span>' +
       '</div>' +
-      (!mode.active ? '<span class="mode-card-lock">' + t('home_coming_soon') + '</span>' : '') +
       (mode.id === _selectedModeId ? '<span class="mode-card-check">✓</span>' : '');
     if (mode.active) { card.addEventListener('click', function () { _selectMode(mode.id); }); }
     children.appendChild(card);
@@ -279,10 +284,17 @@ function _selectMode(id) {
   vibrateDevice([18], _settings.vibration);
 }
 
+/* ★ MODIFICADO: hero visual con SVG de calendario para el modo daily ★ */
 function _updateHeroVisual(id) {
   var heroEl = document.getElementById('hero-visual'); if (!heroEl) return;
   heroEl.classList.remove('hero-anim'); void heroEl.offsetWidth; heroEl.classList.add('hero-anim');
-  heroEl.textContent = _getModeVisual(id);
+
+  /* Para el modo daily mostramos el calendario SVG a mayor tamaño en el hero */
+  if (id === 'daily' && typeof getDailyCalendarIcon === 'function') {
+    heroEl.innerHTML = getDailyCalendarIcon(58);
+  } else {
+    heroEl.textContent = _getModeVisual(id);
+  }
 }
 
 /* ── Arranque ─────────────────────────────────────────────── */
@@ -533,8 +545,7 @@ function renderStatsScreen() {
   var modeNames = {'guess-country':t('mode_guess_country'),'guess-flag':t('mode_guess_flag'),'timetrial':t('mode_time_attack'),'daily':t('mode_daily')};
   var modeCounts = {}; loadRanking().forEach(function(e){modeCounts[e.mode]=(modeCounts[e.mode]||0)+1;});
   var favMode = Object.keys(modeCounts).sort(function(a,b){return modeCounts[b]-modeCounts[a];})[0];
-  var accuracy = stats.total_games > 0 ?
-    Math.min(Math.round((stats.total_correct/Math.max(stats.total_games*10,1))*100),100) : 0;
+  var accuracy = stats.total_games > 0 ? Math.min(Math.round((stats.total_correct/Math.max(stats.total_games*10,1))*100),100) : 0;
   var streak = getDailyStreak(); var wrong = getTopWrongCountries(5);
   var html = '<div class="stats-grid">';
   function stat(l,v){return '<div class="stat-card card"><span class="stat-val">'+v+'</span><span class="stat-label">'+l+'</span></div>';}

@@ -13,18 +13,73 @@ function getDailyCountries() {
   return seededShuffle(COUNTRIES.slice(), rng).slice(0, DAILY_COUNT);
 }
 
+/**
+ * Genera un icono SVG de calendario que muestra el día actual.
+ * @param {number} size  Tamaño en px (por defecto 30)
+ * @returns {string}  HTML string con el SVG inline
+ */
+function getDailyCalendarIcon(size) {
+  var d = new Date();
+  var day = d.getDate();
+  var monthIdx = d.getMonth();
+
+  /* Nombres cortos de mes según idioma activo */
+  var lang = (typeof getLang === 'function') ? getLang() : 'es';
+  var monthsEs = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  var monthsEn = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  var month = (lang === 'en' ? monthsEn : monthsEs)[monthIdx];
+
+  var s = size || 30;
+
+  /* Proporciones internas del SVG (viewBox 28×28) */
+  return (
+    '<svg width="' + s + '" height="' + s + '" viewBox="0 0 28 28"' +
+    ' xmlns="http://www.w3.org/2000/svg"' +
+    ' style="display:inline-block;vertical-align:middle;' +
+    'filter:drop-shadow(0 2px 5px rgba(0,0,0,.45))">' +
+
+    /* Fondo blanco redondeado */
+    '<rect width="28" height="28" rx="5.5" fill="#ffffff"/>' +
+
+    /* Cabecera roja (top + rect cuadrado para eliminar curva inferior) */
+    '<rect width="28" height="8.5" rx="5.5" fill="#e53935"/>' +
+    '<rect y="3" width="28" height="5.5" fill="#e53935"/>' +
+
+    /* Línea separadora sutil */
+    '<line x1="0" y1="8.5" x2="28" y2="8.5" stroke="#ccc" stroke-width="0.4"/>' +
+
+    /* Mes en la cabecera */
+    '<text x="14" y="6.8"' +
+    ' text-anchor="middle"' +
+    ' font-size="5" font-weight="700" fill="#ffffff"' +
+    ' font-family="system-ui,-apple-system,Helvetica,Arial,sans-serif"' +
+    ' letter-spacing="0.5">' + month + '</text>' +
+
+    /* Número del día — tamaño ajustado para 1 o 2 dígitos */
+    '<text x="14" y="' + (day < 10 ? '22' : '22') + '"' +
+    ' text-anchor="middle"' +
+    ' font-size="' + (day < 10 ? '14' : '13') + '"' +
+    ' font-weight="900" fill="#1a1a2e"' +
+    ' font-family="system-ui,-apple-system,Helvetica,Arial,sans-serif">' + day + '</text>' +
+
+    '</svg>'
+  );
+}
+
 function updateDailyCardUI() {
-  var icon=document.getElementById('daily-icon');
-  var status=document.getElementById('daily-status');
-  if (!icon||!status) return;
+  var icon   = document.getElementById('daily-icon');
+  var status = document.getElementById('daily-status');
+  if (!icon || !status) return;
+
   if (isDailyCompleted()) {
-    var sc=getDailyCompletedScore();
-    icon.textContent='✅';
-    status.textContent=t('home_daily_done')+(sc!==null?' · '+sc+'/'+DAILY_COUNT:'');
+    var sc = getDailyCompletedScore();
+    icon.textContent = '✅';
+    status.textContent = t('home_daily_done') + (sc !== null ? ' · ' + sc + '/' + DAILY_COUNT : '');
     if (status.closest('.daily-card')) status.closest('.daily-card').classList.add('daily-done');
   } else {
-    icon.textContent='📅';
-    status.textContent=t('home_daily_play');
+    /* Icono de calendario dinámico con el día actual */
+    icon.innerHTML = getDailyCalendarIcon(30);
+    status.textContent = t('home_daily_play');
     if (status.closest('.daily-card')) status.closest('.daily-card').classList.remove('daily-done');
   }
 }
