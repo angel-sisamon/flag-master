@@ -107,6 +107,11 @@ var I18N_STRINGS = {
     notif_title:         '📅 ¡Reto del día pendiente!',
     notif_body:          'Todavía tienes tiempo. ¿Puedes con las 15 banderas de hoy?',
     notif_body_streak:   '🔥 ¡Tu racha de {n} días está en juego! No la rompas.',
+    review_title       : '¿Te gusta FlagMaster?',
+    review_subtitle    : 'Cuéntaselo a los demás y ayúdanos a crecer 🚀',
+    review_btn_rate    : '⭐ Valorar en Play Store',
+    review_btn_later   : 'Más tarde',
+    review_btn_never   : 'No volver a preguntar',
   },
 
   en: {
@@ -207,6 +212,11 @@ var I18N_STRINGS = {
     notif_title:         '📅 Daily Challenge waiting!',
     notif_body:          'You still have time. Can you get all 15 flags today?',
     notif_body_streak:   '🔥 Your {n}-day streak is on the line! Don\'t break it.',
+    review_title       : 'Enjoying FlagMaster?',
+    review_subtitle    : 'Tell others and help us grow 🚀',
+    review_btn_rate    : '⭐ Rate on Play Store',
+    review_btn_later   : 'Later',
+    review_btn_never   : 'Never ask again',
   }
 };
 

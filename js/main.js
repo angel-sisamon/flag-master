@@ -445,6 +445,11 @@ function _endGame() {
     }
 
     showScreen('results');
+
+    // ── App Review ──────────────────────────
+    AppReview.recordSession();
+    AppReview.maybeShow();
+    
     if (state.score / Math.max(total, 1) >= 0.7) {
       delay(400).then(function () { launchConfetti(document.getElementById('confetti-canvas')); });
     }

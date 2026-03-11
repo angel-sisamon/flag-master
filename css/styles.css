@@ -824,3 +824,136 @@ body.light .btn-play-main--leaderboard {
   padding-right:2rem;
 }
 body.light .continent-select--settings { background-color:#f0f0f8; }
+
+/* ════════════════════════════════════════════════════════════════
+   APP REVIEW MODAL — Popup de valoración
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Transición de entrada del modal ──────────────────────────── */
+#modal-app-review          { opacity:0; transition:opacity .25s ease; }
+#modal-app-review.review-visible { opacity:1; }
+
+/* ── Panel ─────────────────────────────────────────────────────── */
+.review-panel {
+  max-width: 320px;
+  padding: 1.6rem 1.4rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  text-align: center;
+  border: 1.5px solid rgba(255,208,64,.18);
+  box-shadow: 0 24px 80px rgba(0,0,0,.7),
+              0 0 0 1px rgba(255,208,64,.06),
+              inset 0 1px 0 rgba(255,255,255,.06);
+}
+body.light .review-panel {
+  border-color: rgba(212,128,0,.2);
+  box-shadow: 0 12px 48px rgba(60,60,120,.18);
+}
+
+/* ── Emoji grande ───────────────────────────────────────────────── */
+.review-emoji-wrap {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: .5rem;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
+  animation: review-bounce .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes review-bounce {
+  0%   { transform: scale(0.5); opacity:0; }
+  100% { transform: scale(1);   opacity:1; }
+}
+
+/* ── Título y subtítulo ─────────────────────────────────────────── */
+.review-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: .4rem 0 .25rem;
+  line-height: 1.25;
+}
+.review-subtitle {
+  font-size: .84rem;
+  color: var(--text-2);
+  line-height: 1.45;
+  margin-bottom: .6rem;
+}
+
+/* ── Estrellas ──────────────────────────────────────────────────── */
+.review-stars {
+  display: flex;
+  gap: .3rem;
+  margin: .65rem 0 .8rem;
+}
+
+.review-star {
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--border);            /* apagada */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: .1rem .05rem;
+  outline: none;
+  transition: color .15s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+  /* Evitar selección de texto al tocar rápido */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.review-star:active { transform: scale(.88); }
+
+/* Estado encendido */
+.review-star--on {
+  color: var(--gold);
+  text-shadow: 0 0 12px var(--gold-glow);
+}
+
+/* Animación pop al seleccionar */
+@keyframes star-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(.88); }
+  100% { transform: scale(1); }
+}
+.review-star--pop {
+  animation: star-pop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* ── Botones de acción ──────────────────────────────────────────── */
+.review-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  width: 100%;
+  margin-top: .4rem;
+}
+
+/* Botón principal "Valorar" — hereda .btn .btn-primary, solo ajuste de ancho */
+.review-btn-rate {
+  width: 100%;
+  animation: review-btn-in .28s cubic-bezier(.34,1.46,.64,1) both;
+}
+@keyframes review-btn-in {
+  0%   { opacity:0; transform: translateY(6px) scale(.96); }
+  100% { opacity:1; transform: translateY(0)   scale(1);   }
+}
+
+/* Botón "No volver a preguntar" — texto pequeño discreto */
+.review-btn-never {
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-size: .76rem;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: .2rem .5rem;
+  border-radius: var(--r-xl);
+  transition: color .15s;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.review-btn-never:hover,
+.review-btn-never:focus { color: var(--text-2); }
+.review-btn-never:active { opacity: .7; }
