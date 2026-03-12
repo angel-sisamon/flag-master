@@ -283,6 +283,3 @@ Estas mejoras están planteadas para fortalecer mantenibilidad y escalado sin ca
 
 7. **Checklist de release**
    - Lista de verificación antes de publicar (IDs reales, orden de scripts, traducciones, fallbacks).
-
-8. **Baseline de calidad incremental**
-   - Empezar con validaciones mínimas (consistencia de i18n y smoke checks de carga) antes de introducir tooling más pesado.
