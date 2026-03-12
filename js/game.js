@@ -18,6 +18,8 @@ function _isValidGameStateShape(s) {
     typeof s.mode === 'string' &&
     Array.isArray(s.questions) &&
     typeof s.currentIndex === 'number' &&
+    s.currentIndex >= 0 &&
+    (s.questions.length === 0 ? s.currentIndex === 0 : s.currentIndex < s.questions.length) &&
     typeof s.score === 'number' &&
     typeof s.streak === 'number' &&
     typeof s.maxStreak === 'number' &&

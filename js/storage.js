@@ -6,6 +6,8 @@ var STORE_PREFIX = 'flagmaster_';
 function _isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
 function _toNum(v, def) { return (typeof v === 'number' && isFinite(v)) ? v : def; }
 function _toBool(v, def) { return (typeof v === 'boolean') ? v : def; }
+function _toBoolOrNull(v, def) { return (v === null || typeof v === 'boolean') ? v : def; }
+function _isNonEmptyString(v) { return typeof v === 'string' && v !== ''; }
 
 function storageSave(key, value) {
   try { localStorage.setItem(STORE_PREFIX+key, JSON.stringify(value)); } catch(e) {}
@@ -29,10 +31,10 @@ function loadSettings() {
     timerDuration: _toNum(saved.timerDuration, defaults.timerDuration),
     soundEnabled:  _toBool(saved.soundEnabled, defaults.soundEnabled),
     vibration:     _toBool(saved.vibration, defaults.vibration),
-    darkMode:      (saved.darkMode === null || typeof saved.darkMode === 'boolean') ? saved.darkMode : defaults.darkMode
+    darkMode:      _toBoolOrNull(saved.darkMode, defaults.darkMode)
   };
   /* darkMode null = nunca se ha guardado preferencia → usar sistema */
-  if (saved.darkMode === null || saved.darkMode === undefined) {
+  if (saved.darkMode === null) {
     saved.darkMode = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   }
   return saved;
@@ -53,7 +55,7 @@ function saveBestScore(mode, score) {
 
 function loadLastMode()      {
   var mode = storageLoad('last_mode','guess-country');
-  return (typeof mode === 'string' && mode) ? mode : 'guess-country';
+  return _isNonEmptyString(mode) ? mode : 'guess-country';
 }
 function saveLastMode(mode)  { storageSave('last_mode', mode); }
 
@@ -99,11 +101,11 @@ function loadAchievements() {
   if (!_isObj(raw)) return def;
   var stats = _isObj(raw.stats) ? raw.stats : {};
   return {
-    unlocked: Array.isArray(raw.unlocked) ? raw.unlocked.filter(function(v){ return typeof v === 'string'; }) : [],
+    unlocked: Array.isArray(raw.unlocked) ? raw.unlocked.filter(_isNonEmptyString) : [],
     stats: {
       total_correct:   _toNum(stats.total_correct, 0),
       total_games:     _toNum(stats.total_games, 0),
-      modes_played:    Array.isArray(stats.modes_played) ? stats.modes_played.filter(function(v){ return typeof v === 'string'; }) : [],
+      modes_played:    Array.isArray(stats.modes_played) ? stats.modes_played.filter(_isNonEmptyString) : [],
       daily_completed: _toNum(stats.daily_completed, 0),
       max_time_attack: _toNum(stats.max_time_attack, 0),
       max_streak_ever: _toNum(stats.max_streak_ever, 0)
