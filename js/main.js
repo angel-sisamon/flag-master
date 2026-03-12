@@ -59,10 +59,42 @@ var _globalSecs        = 60;
 var _gameActive        = false;
 var _autoAdvance       = null;
 
+function _validateStartupDependencies() {
+  var requiredGlobals = [
+    'initI18N', 'applyDarkMode', 'AudioFX', 'FirebaseLeaderboard', 'NotificationService',
+    'ProfilePill', 'PlayGamesService', 'initSettingsEvents', 'updateDailyCardUI',
+    'initRankingFilters', 'renderRankingScreen', 'renderAchievementsScreen', 'showScreen'
+  ];
+  var missing = requiredGlobals.filter(function (k) { return typeof window[k] === 'undefined'; });
+  if (missing.length) {
+    console.error('[FlagMaster] Dependencias globales no encontradas:', missing.join(', '));
+  }
+
+  var expectedOrder = [
+    'js/config.js', 'js/i18n.js', 'js/storage.js', 'js/utils.js', 'js/audio.js',
+    'js/countries-data.js', 'js/daily.js', 'js/achievements.js',
+    'js/ranking.js', 'js/game.js', 'js/ui.js', 'js/settings.js', 'js/main.js'
+  ];
+  var idx = expectedOrder.map(function (path) {
+    for (var i = 0; i < document.scripts.length; i++) {
+      var src = document.scripts[i].getAttribute('src') || '';
+      if (src.indexOf(path) !== -1) return i;
+    }
+    return -1;
+  });
+  for (var j = 1; j < idx.length; j++) {
+    if (idx[j] !== -1 && idx[j - 1] !== -1 && idx[j] < idx[j - 1]) {
+      console.warn('[FlagMaster] Posible orden incorrecto de scripts entre', expectedOrder[j - 1], 'y', expectedOrder[j]);
+      break;
+    }
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════
    INICIALIZACIÓN
    ══════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function () {
+  _validateStartupDependencies();
 
   initI18N();
   applyDarkMode(_settings.darkMode);
