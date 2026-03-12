@@ -88,7 +88,7 @@ function _optBtn(option, idx, mode, onAnswer) {
   } else {
     btn.innerHTML=badge+'<span class="option-text">'+cn(option)+'</span>';
   }
-  btn.addEventListener('click',(function(ci){return function(){onAnswer(ci);};})(idx),{once:true});
+  btn.addEventListener('click', function () { onAnswer(idx); }, { once:true });
   return btn;
 }
 
