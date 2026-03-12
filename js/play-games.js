@@ -23,7 +23,9 @@ var PlayGamesService = (function () {
    * ⚠️  REEMPLAZA cada valor 'CgkI_REEMPLAZA_...' con el ID real
    *     generado por Google Play Console al crear cada logro.
    * ────────────────────────────────────────────────────────────── */
-  var ACHIEVEMENT_MAP = {
+  var _cfg = (window.AppConfig && window.AppConfig.playGames) || {};
+
+  var ACHIEVEMENT_MAP = _cfg.achievementMap || {
     'first_correct':   'CgkIx-P40Z4ZEAIQAQ',
     'streak_3':        'CgkIx-P40Z4ZEAIQAg',
     'streak_5':        'CgkIx-P40Z4ZEAIQAw',
@@ -45,7 +47,7 @@ var PlayGamesService = (function () {
    *
    * ⚠️  REEMPLAZA con el ID real generado en Play Console → Leaderboards
    * ────────────────────────────────────────────────────────────── */
-  var LEADERBOARD_MAP = {
+  var LEADERBOARD_MAP = _cfg.leaderboardMap || {
     'daily_challenge': 'CgkIx-P40Z4ZEAIQDw'
   };
 

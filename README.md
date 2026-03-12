@@ -69,7 +69,7 @@ flagmaster/
 ```
 
 > **Orden de carga de scripts** (importante — sin ES Modules):
-> `i18n → storage → utils → audio → countries-data → daily → achievements → ranking → game → ui → settings → main`
+> `config → i18n → storage → utils → audio → countries-data → daily → achievements → ranking → game → ui → settings → main`
 
 ---
 
@@ -244,3 +244,42 @@ npx cap open android   # abre Android Studio
 - **Nombres de modo internos** — siempre usar los IDs de `game.js`: `'guess-country'`, `'guess-flag'`, `'timetrial'`, `'daily'`
 - **i18n** — nunca strings hardcodeados en JS/HTML; siempre `t('clave')`  o `data-i18n="clave"`
 - **Países** — nombres siempre a través de `cn(country)` (resuelve el idioma activo automáticamente)
+
+---
+
+## 🧱 Propuestas de robustez y escalabilidad (sin alterar funcionamiento)
+
+Estas mejoras están planteadas para fortalecer mantenibilidad y escalado sin cambiar reglas de juego, UX ni contratos actuales:
+
+### Prioridad alta (impacto alto / riesgo bajo)
+
+1. **Centralizar configuración externa en `js/config.js`**
+   - Mover IDs y constantes de integración (Firebase, Play Games, notificaciones) a un único punto.
+   - Reduce errores de despliegue y facilita configuración por entorno.
+
+2. **Agregar validaciones defensivas de estado y storage**
+   - Validar forma mínima de `_gameState` y objetos cargados desde `localStorage`.
+   - Si hay datos corruptos, aplicar fallback seguro sin romper flujo de partida.
+
+3. **Validar secuencia de carga de scripts en arranque**
+   - Añadir chequeo liviano para detectar dependencias globales faltantes.
+   - Mantiene el modelo actual sin módulos, pero con detección temprana de fallos.
+
+### Prioridad media (impacto alto / esfuerzo moderado)
+
+4. **Desacoplar `main.js` por responsabilidad**
+   - Separar inicialización, eventos de juego y navegación de pantallas en archivos dedicados.
+   - Mantener APIs públicas actuales para no romper integración existente.
+
+5. **Centralizar gestión de timers**
+   - Unificar inicio/parada/limpieza de timers en un manager único.
+   - Evita condiciones de carrera entre modos y simplifica depuración.
+
+6. **Crear capa mínima de acceso al DOM**
+   - Envolver selectores y actualizaciones frecuentes en utilidades comunes.
+   - Reduce acoplamiento entre HTML y lógica de aplicación.
+
+### Prioridad baja (alto retorno operativo)
+
+7. **Checklist de release**
+   - Lista de verificación antes de publicar (IDs reales, orden de scripts, traducciones, fallbacks).

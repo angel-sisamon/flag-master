@@ -413,20 +413,15 @@
 
 <!-- ═══════════════════════════════ SCRIPTS ═══════════════════════════════════════ -->
 
+<script src="js/config.js"></script>
+
 <!-- Firebase SDK compat (carga desde CDN, no-op si offline) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
   /* ⚠️ REEMPLAZA con tu config real de Firebase Console */
-  if (typeof firebase !== 'undefined') {
-    firebase.initializeApp({
-      apiKey: "AIzaSyC7AWLRBIzYfy681OleacIBf117BSRi208",
-      authDomain: "flagmaster-14d61.firebaseapp.com",
-      projectId: "flagmaster-14d61",
-      storageBucket: "flagmaster-14d61.firebasestorage.app",
-      messagingSenderId: "101776765614",
-      appId: "1:101776765614:web:db52567dde733b3b2a333f"
-    });
+  if (typeof firebase !== 'undefined' && window.AppConfig && window.AppConfig.firebase) {
+    firebase.initializeApp(window.AppConfig.firebase);
   }
 </script>
 

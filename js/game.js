@@ -12,6 +12,33 @@
 
 var _gameState = null;
 
+function _isValidGameStateShape(s) {
+  var hasValidCurrentIndex = !!s &&
+    typeof s.currentIndex === 'number' &&
+    s.currentIndex >= 0 &&
+    (
+      (Array.isArray(s.questions) && s.questions.length === 0 && s.currentIndex === 0) ||
+      (Array.isArray(s.questions) && s.questions.length > 0 && s.currentIndex < s.questions.length)
+    );
+
+  return !!s &&
+    typeof s === 'object' &&
+    typeof s.mode === 'string' &&
+    Array.isArray(s.questions) &&
+    hasValidCurrentIndex &&
+    typeof s.score === 'number' &&
+    typeof s.streak === 'number' &&
+    typeof s.maxStreak === 'number' &&
+    typeof s.correct === 'number' &&
+    typeof s.wrong === 'number' &&
+    typeof s.attempted === 'number' &&
+    Array.isArray(s.wrongList) &&
+    typeof s.answered === 'boolean' &&
+    typeof s.finished === 'boolean' &&
+    typeof s.isTimeTrial === 'boolean' &&
+    typeof s.isDailyChallenge === 'boolean';
+}
+
 /**
  * Inicializa una nueva partida.
  * @param {string} mode
@@ -69,7 +96,7 @@ function initGame(mode, numQuestions, prebuiltQuestions, continent) {
 
 /** Copia superficial del estado actual. */
 function getGameState() {
-  if (!_gameState) return null;
+  if (!_isValidGameStateShape(_gameState)) return null;
   return {
     mode:             _gameState.mode,
     continent:        _gameState.continent,
@@ -92,11 +119,12 @@ function getGameState() {
 }
 
 function getCurrentQuestion() {
-  return _gameState ? _gameState.questions[_gameState.currentIndex] : null;
+  if (!_isValidGameStateShape(_gameState)) return null;
+  return _gameState.questions[_gameState.currentIndex] || null;
 }
 
 function getTotalQuestions() {
-  return _gameState ? _gameState.questions.length : 0;
+  return _isValidGameStateShape(_gameState) ? _gameState.questions.length : 0;
 }
 
 /**
