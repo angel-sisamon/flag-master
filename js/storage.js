@@ -3,6 +3,10 @@
  */
 var STORE_PREFIX = 'flagmaster_';
 
+function _isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+function _toNum(v, def) { return (typeof v === 'number' && isFinite(v)) ? v : def; }
+function _toBool(v, def) { return (typeof v === 'boolean') ? v : def; }
+
 function storageSave(key, value) {
   try { localStorage.setItem(STORE_PREFIX+key, JSON.stringify(value)); } catch(e) {}
 }
@@ -17,7 +21,16 @@ function storeSaveLang(lang) { storageSave('lang', lang); }
 
 function loadSettings() {
   var defaults = {numQuestions:10,timerEnabled:false,timerDuration:15,soundEnabled:true,vibration:true,darkMode:null};
-  var saved = storageLoad('settings', defaults);
+  var raw = storageLoad('settings', defaults);
+  var saved = _isObj(raw) ? raw : {};
+  saved = {
+    numQuestions:  _toNum(saved.numQuestions, defaults.numQuestions),
+    timerEnabled:  _toBool(saved.timerEnabled, defaults.timerEnabled),
+    timerDuration: _toNum(saved.timerDuration, defaults.timerDuration),
+    soundEnabled:  _toBool(saved.soundEnabled, defaults.soundEnabled),
+    vibration:     _toBool(saved.vibration, defaults.vibration),
+    darkMode:      (saved.darkMode === null || typeof saved.darkMode === 'boolean') ? saved.darkMode : defaults.darkMode
+  };
   /* darkMode null = nunca se ha guardado preferencia → usar sistema */
   if (saved.darkMode === null || saved.darkMode === undefined) {
     saved.darkMode = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -26,18 +39,29 @@ function loadSettings() {
 }
 function saveSettings(s) { storageSave('settings', s); }
 
-function loadBestScore(mode)  { return (storageLoad('best_scores',{})[mode])||0; }
+function loadBestScore(mode)  {
+  var scores = storageLoad('best_scores',{});
+  scores = _isObj(scores) ? scores : {};
+  return _toNum(scores[mode], 0);
+}
 function saveBestScore(mode, score) {
   var scores = storageLoad('best_scores',{});
+  scores = _isObj(scores) ? scores : {};
   if (score > (scores[mode]||0)) { scores[mode]=score; storageSave('best_scores',scores); return true; }
   return false;
 }
 
-function loadLastMode()      { return storageLoad('last_mode','guess-country'); }
+function loadLastMode()      {
+  var mode = storageLoad('last_mode','guess-country');
+  return (typeof mode === 'string' && mode) ? mode : 'guess-country';
+}
 function saveLastMode(mode)  { storageSave('last_mode', mode); }
 
-function loadRanking()       { return storageLoad('ranking',[]); }
-function saveRanking(list)   { storageSave('ranking', list); }
+function loadRanking()       {
+  var list = storageLoad('ranking',[]);
+  return Array.isArray(list) ? list : [];
+}
+function saveRanking(list)   { storageSave('ranking', Array.isArray(list) ? list : []); }
 function addRankingEntry(entry) {
   var list = loadRanking();
   list.push(entry);
@@ -70,11 +94,28 @@ function setLastEntryName(mode, name) {
 }
 
 function loadAchievements() {
-  return storageLoad('achievements',{unlocked:[],stats:{total_correct:0,total_games:0,modes_played:[],daily_completed:0,max_time_attack:0,max_streak_ever:0}});
+  var def = {unlocked:[],stats:{total_correct:0,total_games:0,modes_played:[],daily_completed:0,max_time_attack:0,max_streak_ever:0}};
+  var raw = storageLoad('achievements', def);
+  if (!_isObj(raw)) return def;
+  var stats = _isObj(raw.stats) ? raw.stats : {};
+  return {
+    unlocked: Array.isArray(raw.unlocked) ? raw.unlocked.filter(function(v){ return typeof v === 'string'; }) : [],
+    stats: {
+      total_correct:   _toNum(stats.total_correct, 0),
+      total_games:     _toNum(stats.total_games, 0),
+      modes_played:    Array.isArray(stats.modes_played) ? stats.modes_played.filter(function(v){ return typeof v === 'string'; }) : [],
+      daily_completed: _toNum(stats.daily_completed, 0),
+      max_time_attack: _toNum(stats.max_time_attack, 0),
+      max_streak_ever: _toNum(stats.max_streak_ever, 0)
+    }
+  };
 }
 function saveAchievements(d) { storageSave('achievements', d); }
 
-function loadDailyStatus()   { return storageLoad('daily',{}); }
+function loadDailyStatus()   {
+  var d = storageLoad('daily',{});
+  return _isObj(d) ? d : {};
+}
 function saveDailyStatus(d)  { storageSave('daily', d); }
 function getDailyKey() {
   var d=new Date();
@@ -102,7 +143,10 @@ function getDailyStreak() {
 }
 
 /* ── Estadísticas y países fallados ──────────────────────── */
-function loadWrongCountries() { return storageLoad('wrong_countries', {}); }
+function loadWrongCountries() {
+  var d = storageLoad('wrong_countries', {});
+  return _isObj(d) ? d : {};
+}
 function saveWrongCountries(d) { storageSave('wrong_countries', d); }
 function recordWrongCountry(code) {
   var d = loadWrongCountries();
