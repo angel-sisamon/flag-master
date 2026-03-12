@@ -13,13 +13,19 @@
 var _gameState = null;
 
 function _isValidGameStateShape(s) {
+  var hasValidCurrentIndex = !!s &&
+    typeof s.currentIndex === 'number' &&
+    s.currentIndex >= 0 &&
+    (
+      (Array.isArray(s.questions) && s.questions.length === 0 && s.currentIndex === 0) ||
+      (Array.isArray(s.questions) && s.questions.length > 0 && s.currentIndex < s.questions.length)
+    );
+
   return !!s &&
     typeof s === 'object' &&
     typeof s.mode === 'string' &&
     Array.isArray(s.questions) &&
-    typeof s.currentIndex === 'number' &&
-    s.currentIndex >= 0 &&
-    (s.questions.length === 0 ? s.currentIndex === 0 : s.currentIndex < s.questions.length) &&
+    hasValidCurrentIndex &&
     typeof s.score === 'number' &&
     typeof s.streak === 'number' &&
     typeof s.maxStreak === 'number' &&
