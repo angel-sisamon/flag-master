@@ -15,9 +15,10 @@
 
 var NotificationService = (function () {
 
-  var NOTIF_ID     = 1001;   /* ID fijo — siempre sobrescribimos la misma notif */
-  var NOTIF_HOUR   = 20;     /* Hora fija del recordatorio: 20:00 */
-  var NOTIF_MINUTE = 0;
+  var _cfg = (window.AppConfig && window.AppConfig.notifications) || {};
+  var NOTIF_ID     = (typeof _cfg.id === 'number') ? _cfg.id : 1001;     /* ID fijo — siempre sobrescribimos la misma notif */
+  var NOTIF_HOUR   = (typeof _cfg.hour === 'number') ? _cfg.hour : 20;   /* Hora fija del recordatorio: 20:00 */
+  var NOTIF_MINUTE = (typeof _cfg.minute === 'number') ? _cfg.minute : 0;
 
   /* ── Acceso al plugin ──────────────────────────────── */
 

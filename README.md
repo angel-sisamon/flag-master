@@ -69,7 +69,7 @@ flagmaster/
 ```
 
 > **Orden de carga de scripts** (importante — sin ES Modules):
-> `i18n → storage → utils → audio → countries-data → daily → achievements → ranking → game → ui → settings → main`
+> `config → i18n → storage → utils → audio → countries-data → daily → achievements → ranking → game → ui → settings → main`
 
 ---
 
